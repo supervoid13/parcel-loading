@@ -30,7 +30,7 @@ public class UniformLoadingService implements LoadingService {
 
         List<Parcel> sortedParcels = parcelService.prepareParcels(parcels);
 
-        double avgParcelsSquare = parcelService.calculateAverageSquare(parcels);
+        double avgParcelsSquare = calculateAverageSquare(parcels, trucks.size());
 
         int truckIndex = 0, layerLevel = 1;
         Truck truck = trucks.get(truckIndex);
@@ -40,15 +40,46 @@ public class UniformLoadingService implements LoadingService {
         while (!sortedParcels.isEmpty()) {
             Parcel parcel = findMostSuitableParcel(sortedParcels, truck, avgParcelsSquare);
 
-            int spaceWidth = widthAndIndex[0], index = widthAndIndex[1];
+            if (!needToLoadMore(parcel, truck, avgParcelsSquare)) {
+                truckIndex = truckIndex == trucks.size() - 1 ? 0 : truckIndex + 1;
+                truck = trucks.get(truckIndex);
+                layerLevel = 1;
+            }
 
-            truck.tryLoadParcel(parcel, layerLevel, spaceWidth, index);
+            while (true) {
+                int spaceWidth = widthAndIndex[0], index = widthAndIndex[1];
+                boolean isSuccessful = truck.tryLoadParcel(parcel, layerLevel, spaceWidth, index);
+
+                if (isSuccessful) break;
+
+                widthAndIndex = truck.getEmptySpaceWidthAndIndexOnLayer(++layerLevel);
+            }
 
             sortedParcels.remove(parcel);
 
 //            truckIndex = truckIndex == trucks.size() - 1 ? 0 : truckIndex + 1;
 //            truck = trucks.get(truckIndex);
         }
+    }
+
+    private double calculateAverageSquare(List<Parcel> parcels, int truckAmount) {
+        double totalParcelsSquare = parcels.stream()
+                .map(Parcel::getSquare)
+                .mapToInt(x -> x)
+                .average()
+                .orElse(0d);
+
+        return totalParcelsSquare / truckAmount;
+    }
+
+    private boolean needToLoadMore(Parcel parcel, Truck truck, double avgParcelsSquare) {
+        int occupiedSpace = truck.getOccupiedSpaceSquare();
+        double diffBeforeLoad = Math.abs(avgParcelsSquare - occupiedSpace);
+
+        int occupiedSpaceIfLoad = occupiedSpace + parcel.getSquare();
+        double diffIfLoad = Math.abs(avgParcelsSquare - occupiedSpaceIfLoad);
+
+        return diffIfLoad < diffBeforeLoad;
     }
 
     private Parcel findMostSuitableParcel(List<Parcel> parcels, Truck truck, double avgSquare) {

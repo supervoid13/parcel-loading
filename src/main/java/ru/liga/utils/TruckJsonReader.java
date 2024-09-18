@@ -23,6 +23,7 @@ public class TruckJsonReader {
         JsonArray jsonArray = jsonObject.getAsJsonArray("body");
 
         char[][] body = gson.fromJson(jsonArray, char[][].class);
+        replaceSpaceWithCharNull(body);
 
         return countParcels(body);
     }
