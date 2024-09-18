@@ -20,18 +20,20 @@ public class Parcel {
 
     public int getBottomWidth() {
         int height = box.length;
+
         return box[height - 1].length;
     }
 
     public int getSquare() {
         int result = 0;
+
         for (char[] charArr: box) {
             result += charArr.length;
         }
         return result;
     }
 
-    public static Parcel FromStr(String parcelStr) {
+    public static Parcel fromStr(String parcelStr) {
         int height = (int) parcelStr.chars().filter(ch -> ch == '\n').count() + 1;
 
         char[][] box = new char[height][];

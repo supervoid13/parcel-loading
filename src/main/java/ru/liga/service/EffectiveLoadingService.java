@@ -1,5 +1,6 @@
 package ru.liga.service;
 
+import ru.liga.exceptions.NotEnoughTrucksException;
 import ru.liga.model.Parcel;
 import ru.liga.model.Truck;
 
@@ -9,54 +10,83 @@ import java.util.List;
 
 public class EffectiveLoadingService implements LoadingService {
 
+    private final ParcelService parcelService = new ParcelService();
+
     @Override
-    public List<Truck> loadTrucksWithParcels(List<Parcel> parcels) {
+    public List<Truck> loadTrucksWithParcelsWithInfiniteTrucksAmount(List<Parcel> parcels) {
         List<Truck> trucks = new ArrayList<>();
 
         Truck truck = new Truck();
+        trucks.add(truck);
 
-        List<Parcel> sortedParcels = new ArrayList<>(parcels);
-        sortedParcels.sort(Comparator.comparing(Parcel::getBottomWidth)
-                .thenComparing(Parcel::getSquare)
-                .reversed());
+        loadTrucksWithParcels(parcels, trucks, true);
 
-        int i = 0, layerLevel = 1;
+        return trucks;
+    }
+
+    @Override
+    public List<Truck> loadTrucksWithParcelsWithGivenTrucks(List<Parcel> parcels, List<Truck> trucks) {
+        if (!isLoadingPossible(trucks.size(), parcels)) {
+            throw new NotEnoughTrucksException("Need more trucks");
+        }
+        loadTrucksWithParcels(parcels, trucks, false);
+
+        return trucks;
+    }
+
+    private void loadTrucksWithParcels(
+            List<Parcel> parcels,
+            List<Truck> trucks,
+            boolean allowNewTrucks
+    ) {
+       List<Parcel> sortedParcels = parcelService.prepareParcels(parcels);
+
+       int truckIndex = 0, parcelIndex = 0, layerLevel = 1;
+
+       Truck truck = trucks.get(truckIndex);
 
         int[] widthAndIndex = truck.getEmptySpaceWidthAndIndexOnLayer(layerLevel);
 
         while (!sortedParcels.isEmpty()) {
-            Parcel parcelGuess = sortedParcels.get(i);
+            Parcel parcelGuess = sortedParcels.get(parcelIndex);
 
             int spaceWidth = widthAndIndex[0], index = widthAndIndex[1];
 
             boolean isSuccessful = truck.tryLoadParcel(parcelGuess, layerLevel, spaceWidth, index);
 
             if (isSuccessful) {
-                sortedParcels.remove(i);
-                i = 0;
+                sortedParcels.remove(parcelIndex);
+                parcelIndex = 0;
 
                 while (!truck.isLayerAvailable(layerLevel) && layerLevel != Truck.HEIGHT_CAPACITY)
                     layerLevel++;
 
                 widthAndIndex = truck.getEmptySpaceWidthAndIndexOnLayer(layerLevel);
 
-            } else if (i == sortedParcels.size() - 1) {
+            } else if (parcelIndex == sortedParcels.size() - 1) {
                 if (layerLevel == Truck.HEIGHT_CAPACITY) {
-                    trucks.add(truck);
-                    truck = new Truck();
-                    i = 0;
-                    layerLevel = 1;
+                    if (++truckIndex == trucks.size()) {
+                        if (allowNewTrucks) {
+                            truck = new Truck();
+                            trucks.add(truck);
+                            parcelIndex = 0;
+                            layerLevel = 1;
+                        } else {
+                            throw new NotEnoughTrucksException("Need more trucks");
+                        }
+                    } else {
+                        truck = trucks.get(truckIndex);
+                        parcelIndex = 0;
+                        layerLevel = 1;
+                    }
                 } else {
-                    i = 0;
+                    parcelIndex = 0;
                     layerLevel++;
                 }
                 widthAndIndex = truck.getEmptySpaceWidthAndIndexOnLayer(layerLevel);
             } else {
-                i++;
+                parcelIndex++;
             }
         }
-        trucks.add(truck);
-
-        return trucks;
     }
 }

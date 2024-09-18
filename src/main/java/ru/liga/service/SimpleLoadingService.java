@@ -10,7 +10,7 @@ import java.util.List;
 public class SimpleLoadingService implements LoadingService {
 
     @Override
-    public List<Truck> loadTrucksWithParcels(List<Parcel> parcels) {
+    public List<Truck> loadTrucksWithParcelsWithInfiniteTrucksAmount(List<Parcel> parcels) {
         List<Truck> trucks = new ArrayList<>();
 
         Truck truck = new Truck();
@@ -36,5 +36,10 @@ public class SimpleLoadingService implements LoadingService {
             sortedParcels.remove(i);
         }
         return trucks;
+    }
+
+    @Override
+    public List<Truck> loadTrucksWithParcelsWithGivenTrucks(List<Parcel> parcels, List<Truck> trucks) {
+        throw new UnsupportedOperationException();
     }
 }

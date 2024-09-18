@@ -6,11 +6,37 @@ public class Truck {
 
     public static final int WIDTH_CAPACITY = 6;
     public static final int HEIGHT_CAPACITY = 6;
+    public static final int BODY_SQUARE = WIDTH_CAPACITY * HEIGHT_CAPACITY;
+    public static final char EMPTY_SPACE_DESIGNATION = '\u0000';
 
-    private final char[][] body = new char[HEIGHT_CAPACITY][WIDTH_CAPACITY];
+    private final char[][] body;
+
+    public Truck() {
+        body = new char[HEIGHT_CAPACITY][WIDTH_CAPACITY];
+    }
+
+    public Truck(char[][] body) {
+        this.body = LoadingUtils.getArrayCopy(body);
+    }
 
     public char[][] getBody() {
         return LoadingUtils.getArrayCopy(body);
+    }
+
+    public int getOccupiedSpaceSquare() {
+        int square = 0;
+
+        for (char[] layer: body) {
+            for (char ch: layer) {
+                if (ch != EMPTY_SPACE_DESIGNATION)
+                    square++;
+            }
+        }
+        return square;
+    }
+
+    public int getEmptySpaceSquare() {
+        return BODY_SQUARE - getOccupiedSpaceSquare();
     }
 
     private char[] getLayer(int layerLevel) {
@@ -26,7 +52,7 @@ public class Truck {
         int currentIndex = -1;
 
         for (int i = 0; i < layer.length; i++) {
-            if (layer[i] == '\u0000') {
+            if (layer[i] == EMPTY_SPACE_DESIGNATION) {
                 if (currentLength == 0) {
                     currentIndex = i;
                 }
@@ -49,7 +75,6 @@ public class Truck {
     }
 
     public boolean tryLoadParcel(Parcel parcel, int layerLevel, int spaceWidth, int index) {
-//        int[] widthAndIndex = getEmptySpaceWidthAndIndexOnLayer(layerLevel);
         int tempIndex = index;
         int parcelBottomWidth = parcel.getBottomWidth();
 
@@ -78,7 +103,7 @@ public class Truck {
         char[] layer = getLayer(bottomLayerLevel);
 
         for (int i = index; i < WIDTH_CAPACITY; i++) {
-            if (layer[i] != '\u0000')
+            if (layer[i] != EMPTY_SPACE_DESIGNATION)
                 supportWidthCounter++;
         }
 
@@ -89,7 +114,7 @@ public class Truck {
         char[] layer = getLayer(layerLevel);
 
         for (char ch: layer) {
-            if (ch == '\u0000')
+            if (ch == EMPTY_SPACE_DESIGNATION)
                 return true;
         }
         return false;
@@ -97,10 +122,11 @@ public class Truck {
 
     public void printBody() {
         StringBuilder sb = new StringBuilder();
+
         for (char[] layer: body) {
             sb.append("+");
             for (char ch: layer) {
-                sb.append(ch != '\u0000' ? ch : " ");
+                sb.append(ch != EMPTY_SPACE_DESIGNATION ? ch : " ");
             }
             sb.append("+\n");
         }

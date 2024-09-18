@@ -6,9 +6,7 @@ import ru.liga.utils.ParcelValidator;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class ParcelService {
 
@@ -27,7 +25,7 @@ public class ParcelService {
         for (String parcelStr: parcelsStrArray) {
             parcelValidator.validate(parcelStr);
 
-            Parcel parcel = Parcel.FromStr(parcelStr);
+            Parcel parcel = Parcel.fromStr(parcelStr);
             parcels.add(parcel);
         }
 
@@ -35,5 +33,21 @@ public class ParcelService {
         return parcels;
     }
 
+    public List<Parcel> prepareParcels(List<Parcel> parcels) {
+        ArrayList<Parcel> parcelsCopy = new ArrayList<>(parcels);
 
+        parcelsCopy.sort(Comparator.comparing(Parcel::getBottomWidth)
+                .thenComparing(Parcel::getSquare)
+                .reversed());
+
+        return parcelsCopy;
+    }
+
+    public double calculateAverageSquare(List<Parcel> parcels) {
+        return parcels.stream()
+                .map(Parcel::getSquare)
+                .mapToInt(x -> x)
+                .average()
+                .orElse(0d);
+    }
 }
