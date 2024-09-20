@@ -50,7 +50,7 @@ public class TruckJsonValidator {
                         char charToCheck = body[toCheckI][toCheckJ];
 
                         if (charToCheck != parcelChar) {
-                            log.warn("Invalid json file with trucks");
+                            log.error("Invalid json file with trucks");
                             throw new TruckValidationException("Invalid truck json");
                         }
 
@@ -60,7 +60,7 @@ public class TruckJsonValidator {
                         parcelBodyIndexOnLayer++;
 
                     } catch (IndexOutOfBoundsException e) {
-                        log.warn("Invalid json file with trucks");
+                        log.error("Invalid json file with trucks");
                         throw new TruckValidationException("Invalid truck json");
                     }
                 }

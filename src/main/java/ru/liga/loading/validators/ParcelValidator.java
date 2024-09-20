@@ -22,7 +22,7 @@ public class ParcelValidator {
 
     public void validate(String parcelStr) {
         if (!TEMPLATES.contains(parcelStr)) {
-            log.warn("Parcels are not valid");
+            log.error("Parcels are not valid");
             throw new ParcelValidationException("Not valid parcel string");
         }
     }

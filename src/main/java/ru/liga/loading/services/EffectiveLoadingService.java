@@ -38,7 +38,7 @@ public class EffectiveLoadingService implements LoadingService {
         log.debug("Method '%s' has started".formatted(methodName));
 
         if (!isLoadingPossible(trucks.size(), parcels)) {
-            log.warn("Not enough trucks");
+            log.error("Not enough trucks");
             throw new NotEnoughTrucksException("Need more trucks");
         }
         loadTrucksWithParcels(parcels, trucks, false);
@@ -89,7 +89,7 @@ public class EffectiveLoadingService implements LoadingService {
                             parcelIndex = 0;
                             layerLevel = 1;
                         } else {
-                            log.warn("Not enough trucks");
+                            log.error("Not enough trucks");
                             throw new NotEnoughTrucksException("Need more trucks");
                         }
                     } else {

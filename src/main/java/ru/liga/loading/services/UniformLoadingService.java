@@ -20,7 +20,7 @@ public class UniformLoadingService implements LoadingService {
         log.debug("Method '%s' has started".formatted(methodName));
 
         if (!isLoadingPossible(trucks.size(), parcels)) {
-            log.warn("Not enough trucks");
+            log.error("Not enough trucks");
             throw new NotEnoughTrucksException("Need more trucks");
         }
         loadTrucksWithParcels(parcels, trucks);
@@ -37,7 +37,7 @@ public class UniformLoadingService implements LoadingService {
         log.debug("Method '%s' has started".formatted(methodName));
 
         if (parcels.size() < trucks.size()) {
-            log.warn("Not enough parcels");
+            log.error("Not enough parcels");
             throw new NotEnoughParcelsException("Need more parcels");
         }
 

@@ -32,7 +32,7 @@ public class SimpleLoadingService implements LoadingService {
             boolean isSuccessful = truck.tryLoadParcel(parcelGuess, 1, Truck.WIDTH_CAPACITY, 0);
 
             if (!isSuccessful) {
-                log.warn("Parcel does not fit truck body");
+                log.error("Parcel does not fit truck body");
                 System.out.println("One of the parcels will be deleted (doesn't fit truck body)");
             } else {
                 trucks.add(truck);

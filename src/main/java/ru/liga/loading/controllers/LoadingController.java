@@ -85,7 +85,7 @@ public class LoadingController {
             }
         } catch (IOException e) {
             System.out.println("No such file");
-            log.warn("File not found");
+            log.error("File not found");
         }
         log.debug("Method '%s' has finished".formatted(methodName));
     }
@@ -110,7 +110,7 @@ public class LoadingController {
 
         } catch (IOException e) {
             System.out.println("No such file");
-            log.warn("File not found");
+            log.error("File not found");
         }
     }
 }

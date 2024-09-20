@@ -103,7 +103,7 @@ public class Truck {
         return true;
     }
 
-    private boolean isBottomLayerValid(int parcelBottomWidth, int bottomLayerLevel, int index) {
+    public boolean isBottomLayerValid(int parcelBottomWidth, int bottomLayerLevel, int index) {
         if (bottomLayerLevel == 0) return true;
 
         int supportWidthCounter = 0;
