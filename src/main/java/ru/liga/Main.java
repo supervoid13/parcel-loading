@@ -1,46 +1,37 @@
 package ru.liga;
 
-import ru.liga.model.Parcel;
-import ru.liga.model.Truck;
-import ru.liga.service.EffectiveLoadingService;
-import ru.liga.service.LoadingService;
-import ru.liga.service.ParcelService;
-import ru.liga.service.SimpleLoadingService;
+import lombok.extern.slf4j.Slf4j;
+import ru.liga.loading.controllers.LoadingController;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+@Slf4j
 public class Main {
     public static void main(String[] args) {
-        ParcelService parcelService = new ParcelService();
-        LoadingService loadingService;
-        String filePath;
-        int mode = 0;
+        log.info("Application has started");
 
+        LoadingController loadingController = new LoadingController();
 
-        try (Scanner scanner = new Scanner(System.in)) {
-            System.out.println("Enter file path:");
-            filePath = scanner.nextLine();
-
-            List<Parcel> parcels = parcelService.readParcelsFromFile(filePath);
-
-            System.out.println("Enter mode (simple - 1, effective - 2):");
-            mode = scanner.nextInt();
-
-            switch (mode) {
+        try(Scanner scanner = new Scanner(System.in)) {
+            System.out.println("1 - load parcels, 2 - specify parcels");
+            int func = scanner.nextInt();
+            switch (func) {
                 case 1:
-                    loadingService = new SimpleLoadingService();
+                    loadingController.loadParcels();
                     break;
                 case 2:
-                    loadingService = new EffectiveLoadingService();
+                    loadingController.specifyParcelsAndPrintTrucks();
                     break;
                 default:
-                    System.out.println("No such mode");
-                    return;
+                    System.out.println("No such function");
+                    log.warn("Unknown function has been entered");
             }
-        } catch (IOException e) {
-            System.out.println("No such file");
+        } catch (NoSuchElementException e) {
+            log.warn("Not number has been entered");
+            System.out.println("You have to enter the NUMBER");
         }
+        log.info("Application has finished");
     }
 }
