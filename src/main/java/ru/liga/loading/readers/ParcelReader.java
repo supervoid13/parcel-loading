@@ -16,6 +16,13 @@ public class ParcelReader {
 
     private final ParcelValidator parcelValidator = new ParcelValidator();
 
+    /**
+     * Метод чтения посылок из файла.
+     * @param filePath путь к файлу.
+     * @return список посылок
+     * @throws IOException если при чтении из файла произошла ошибка ввода-вывода или была прочитана
+     * некорректная или неотображаемая последовательность байтов
+     */
     public List<Parcel> readParcelsFromFile(String filePath) throws IOException {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         log.debug("Method '%s' has started".formatted(methodName));

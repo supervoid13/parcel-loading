@@ -1,6 +1,8 @@
 package ru.liga.loading.controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.liga.loading.exceptions.NotEnoughParcelsException;
+import ru.liga.loading.exceptions.NotEnoughTrucksException;
 import ru.liga.loading.models.Parcel;
 import ru.liga.loading.models.Truck;
 import ru.liga.loading.readers.ParcelReader;
@@ -22,6 +24,7 @@ public class LoadingController {
 
     private final TruckJsonReader truckJsonReader = new TruckJsonReader();
 
+    /** Эндпоинт для погрузки посылок в грузовики */
     public void loadParcels() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         log.debug("Method '%s' has started".formatted(methodName));
@@ -74,7 +77,12 @@ public class LoadingController {
                 List<Truck> emptyTrucks = LoadingUtils.generateEmptyTrucks(trucksAmount);
 
                 log.info("Loading has started");
-                trucks = loadingService.loadTrucksWithParcelsWithGivenTrucks(parcels, new ArrayList<>(emptyTrucks));
+                try {
+                    trucks = loadingService.loadTrucksWithParcelsWithGivenTrucks(parcels, new ArrayList<>(emptyTrucks));
+                } catch (NotEnoughTrucksException | NotEnoughParcelsException e) {
+                    System.out.println(e.getMessage());
+                    return;
+                }
                 log.info("Loading has finished");
             }
 
@@ -83,6 +91,7 @@ public class LoadingController {
                 truck.printBody();
                 System.out.println();
             }
+
         } catch (IOException e) {
             System.out.println("No such file");
             log.error("File not found");
@@ -90,12 +99,13 @@ public class LoadingController {
         log.debug("Method '%s' has finished".formatted(methodName));
     }
 
-    public void specifyParcelsAndPrintTrucks() {
+    /** Эндпоинт для подсчёта посылок в грузовиках из json файла*/
+    public void specifyParcels() {
         try (Scanner scanner = new Scanner(System.in)) {
             System.out.println("Enter truck json file path:");
             String filePath = scanner.nextLine();
 
-            List<Truck> trucks = truckJsonReader.readParcelsFromJson(filePath);
+            List<Truck> trucks = truckJsonReader.readTrucksFromJson(filePath);
 
             log.trace("Displaying amount of parcels by rate and truck bodies on screen");
             for (Truck truck : trucks) {

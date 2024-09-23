@@ -20,6 +20,11 @@ public class ParcelValidator {
             "999\n999\n999"
     );
 
+    /**
+     * Валидация строки, содержащей снимок посылки.
+     * @param parcelStr строка со снимком посылки.
+     * @throws ParcelValidationException если снимок посылки невалиден.
+     */
     public void validate(String parcelStr) {
         if (!TEMPLATES.contains(parcelStr)) {
             log.error("Parcels are not valid");

@@ -18,7 +18,14 @@ public class TruckJsonReader {
 
     private final Gson gson = new Gson();
 
-    public List<Truck> readParcelsFromJson(String filePath) throws IOException {
+    /**
+     * Метод чтения грузовиков из json файла.
+     * @param filePath путь к json файлу.
+     * @return список грузовиков.
+     * @throws IOException если при чтении из файла произошла ошибка ввода-вывода или была прочитана
+     * некорректная или неотображаемая последовательность байтов
+     */
+    public List<Truck> readTrucksFromJson(String filePath) throws IOException {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         log.debug("Method '%s' has started".formatted(methodName));
 

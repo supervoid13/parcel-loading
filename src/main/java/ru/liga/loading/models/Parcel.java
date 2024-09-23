@@ -14,16 +14,28 @@ public class Parcel {
 
     private final char[][] box;
 
+    /**
+     * Получение значения поля {@link Parcel#box}
+     * @return копия тела посылки
+     */
     public char[][] getBox() {
         return LoadingUtils.getArrayCopy(box);
     }
 
+    /**
+     * Получение ширины нижнего слоя посылки
+     * @return ширина нижнего слоя посылки
+     */
     public int getBottomWidth() {
         int height = box.length;
 
         return box[height - 1].length;
     }
 
+    /**
+     * Получение площади посылки
+     * @return общая площадь посылки
+     */
     public int getSquare() {
         int result = 0;
 
@@ -33,6 +45,11 @@ public class Parcel {
         return result;
     }
 
+    /**
+     * Получение объекта-посылки из строки
+     * @param parcelStr строка, содержащая внутри себя снимок тела посылки
+     * @return объект-посылка
+     */
     public static Parcel fromStr(String parcelStr) {
         int height = (int) parcelStr.chars().filter(ch -> ch == '\n').count() + 1;
 

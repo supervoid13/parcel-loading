@@ -3,7 +3,6 @@ package ru.liga;
 import lombok.extern.slf4j.Slf4j;
 import ru.liga.loading.controllers.LoadingController;
 
-import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -22,7 +21,7 @@ public class Main {
                     loadingController.loadParcels();
                     break;
                 case 2:
-                    loadingController.specifyParcelsAndPrintTrucks();
+                    loadingController.specifyParcels();
                     break;
                 default:
                     System.out.println("No such function");

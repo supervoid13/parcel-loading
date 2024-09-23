@@ -23,6 +23,11 @@ public class TruckJsonValidator {
             '9', 3
     );
 
+    /**
+     * Валидация кузова грузовика.
+     * @param body кузов грузовика.
+     * @throws TruckValidationException если кузов грузовика невалиден.
+     */
     public void validate(char[][] body) {
         Set<String> validIndexes = new HashSet<>();
 

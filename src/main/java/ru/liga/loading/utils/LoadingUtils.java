@@ -8,6 +8,11 @@ import java.util.stream.Stream;
 
 public class LoadingUtils {
 
+    /**
+     * Метод копирования двумерного массива.
+     * @param array исходный массив.
+     * @return копию двумерного массива.
+     */
     public static char[][] getArrayCopy(char[][] array) {
         char[][] copy = new char[array.length][];
 
@@ -18,6 +23,11 @@ public class LoadingUtils {
         return copy;
     }
 
+    /**
+     * Метод генерирования пустых грузовиков заданного количества.
+     * @param trucksAmount количество грузовиков.
+     * @return список пустых грузовиков.
+     */
     public static List<Truck> generateEmptyTrucks(int trucksAmount) {
         return Stream.generate(Truck::new)
                 .limit(trucksAmount)
