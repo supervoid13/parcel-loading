@@ -1,16 +1,15 @@
 package ru.liga.loading.controllers;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ru.liga.loading.enums.LoadingMode;
 import ru.liga.loading.exceptions.NotEnoughParcelsException;
 import ru.liga.loading.exceptions.NotEnoughTrucksException;
 import ru.liga.loading.models.Parcel;
 import ru.liga.loading.models.Truck;
 import ru.liga.loading.readers.ParcelReader;
 import ru.liga.loading.readers.TruckJsonReader;
-import ru.liga.loading.services.EffectiveLoadingService;
-import ru.liga.loading.services.LoadingService;
-import ru.liga.loading.services.SimpleLoadingService;
-import ru.liga.loading.services.UniformLoadingService;
+import ru.liga.loading.services.*;
 import ru.liga.loading.utils.LoadingUtils;
 
 import java.io.IOException;
@@ -20,20 +19,21 @@ import java.util.Map;
 import java.util.Scanner;
 
 @Slf4j
+@RequiredArgsConstructor
 public class LoadingController {
 
-    private final TruckJsonReader truckJsonReader = new TruckJsonReader();
+    private final TruckJsonReader truckJsonReader;
+    private final ParcelReader parcelReader;
+    private final LoadingServiceFactory loadingServiceFactory;
 
     /** Эндпоинт для погрузки посылок в грузовики */
     public void loadParcels() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         log.debug("Method '%s' has started".formatted(methodName));
 
-        ParcelReader parcelReader = new ParcelReader();
         LoadingService loadingService;
         String filePath;
-        int mode = 0, trucksAmount = -1;
-
+        int modeInt = 0, trucksAmount = -1;
 
         try (Scanner scanner = new Scanner(System.in)) {
             System.out.println("Enter file path:");
@@ -43,48 +43,32 @@ public class LoadingController {
             List<Parcel> parcels = parcelReader.readParcelsFromFile(filePath);
 
             System.out.println("Enter mode (simple - 1, effective - 2, uniform - 3):");
-            mode = scanner.nextInt();
+            modeInt = scanner.nextInt();
+            LoadingMode mode;
+
+            try {
+                mode = LoadingMode.values()[modeInt - 1];
+            } catch (RuntimeException e) {
+                log.warn("Entered invalid mode");
+                throw new UnsupportedOperationException("No such mode");
+            }
+
             log.info("Mode has been entered");
 
-            switch (mode) {
-                case 1:
-                    log.info("Mode - simple loading");
-                    loadingService = new SimpleLoadingService();
-                    break;
-                case 2:
-                    log.info("Mode - effective loading");
-                    loadingService = new EffectiveLoadingService();
-                    break;
-                case 3:
-                    log.info("Mode - uniform loading");
-                    loadingService = new UniformLoadingService();
-                    System.out.println("Enter amount of trucks to load (negative for unlimited amount)");
-                    trucksAmount = scanner.nextInt();
-                    break;
-                default:
-                    System.out.println("No such mode");
-                    log.warn("Entered invalid mode");
-                    return;
-            }
+            loadingService = loadingServiceFactory.createLoadingServiceFromMode(mode);
 
             List<Truck> trucks;
 
-            if (trucksAmount < 0) {
-                log.info("Amount of trucks - infinite");
-                trucks = loadingService.loadTrucksWithParcelsWithInfiniteTrucksAmount(parcels);
-            } else {
-                log.info("Amount of trucks - %d".formatted(trucksAmount));
+            log.info("Loading process has started");
+            if (loadingService instanceof UniformLoadingService ) {
+                System.out.println("Enter amount of trucks to load:");
+                trucksAmount = scanner.nextInt();
                 List<Truck> emptyTrucks = LoadingUtils.generateEmptyTrucks(trucksAmount);
-
-                log.info("Loading has started");
-                try {
-                    trucks = loadingService.loadTrucksWithParcelsWithGivenTrucks(parcels, new ArrayList<>(emptyTrucks));
-                } catch (NotEnoughTrucksException | NotEnoughParcelsException e) {
-                    System.out.println(e.getMessage());
-                    return;
-                }
-                log.info("Loading has finished");
+                trucks = loadingService.loadTrucksWithParcelsWithGivenTrucks(parcels, new ArrayList<>(emptyTrucks));
+            } else {
+                trucks = loadingService.loadTrucksWithParcelsWithInfiniteTrucksAmount(parcels);
             }
+            log.info("Loading has finished");
 
             log.trace("Displaying truck bodies on screen");
             for (Truck truck : trucks) {
@@ -95,6 +79,8 @@ public class LoadingController {
         } catch (IOException e) {
             System.out.println("No such file");
             log.error("File not found");
+        } catch (NotEnoughTrucksException | NotEnoughParcelsException e) {
+            System.out.println(e.getMessage());
         }
         log.debug("Method '%s' has finished".formatted(methodName));
     }

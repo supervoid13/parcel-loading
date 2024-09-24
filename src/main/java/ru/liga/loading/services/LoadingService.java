@@ -4,7 +4,6 @@ import ru.liga.loading.models.Parcel;
 import ru.liga.loading.models.Truck;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 public interface LoadingService {
 

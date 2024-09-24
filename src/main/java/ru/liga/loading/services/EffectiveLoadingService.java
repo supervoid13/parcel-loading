@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import ru.liga.loading.exceptions.NotEnoughTrucksException;
 import ru.liga.loading.models.Parcel;
 import ru.liga.loading.models.Truck;
-import ru.liga.loading.readers.ParcelReader;
 import ru.liga.loading.utils.ParcelUtils;
 
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import java.util.List;
 @Slf4j
 public class EffectiveLoadingService implements LoadingService {
 
-    private final ParcelReader parcelReader = new ParcelReader();
     private final ParcelUtils parcelUtils = new ParcelUtils();
 
     @Override
@@ -27,21 +25,6 @@ public class EffectiveLoadingService implements LoadingService {
         trucks.add(truck);
 
         loadTrucksWithParcels(parcels, trucks, true);
-
-        log.debug("Method '%s' has finished".formatted(methodName));
-        return trucks;
-    }
-
-    @Override
-    public List<Truck> loadTrucksWithParcelsWithGivenTrucks(List<Parcel> parcels, List<Truck> trucks) {
-        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        log.debug("Method '%s' has started".formatted(methodName));
-
-        if (!isLoadingPossible(trucks.size(), parcels)) {
-            log.error("Not enough trucks");
-            throw new NotEnoughTrucksException("Need more trucks");
-        }
-        loadTrucksWithParcels(parcels, trucks, false);
 
         log.debug("Method '%s' has finished".formatted(methodName));
         return trucks;
@@ -107,5 +90,11 @@ public class EffectiveLoadingService implements LoadingService {
             }
         }
         log.debug("Method '%s' has finished".formatted(methodName));
+    }
+
+    @Override
+    public List<Truck> loadTrucksWithParcelsWithGivenTrucks(List<Parcel> parcels, List<Truck> trucks) {
+        log.error("User has selected a loading model that should not be available");
+        throw new UnsupportedOperationException("You can't specify the amount of trucks using the effective loading");
     }
 }

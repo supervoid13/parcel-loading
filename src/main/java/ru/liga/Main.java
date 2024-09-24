@@ -2,6 +2,9 @@ package ru.liga;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.liga.loading.controllers.LoadingController;
+import ru.liga.loading.readers.ParcelReader;
+import ru.liga.loading.readers.TruckJsonReader;
+import ru.liga.loading.services.LoadingServiceFactory;
 
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -11,7 +14,11 @@ public class Main {
     public static void main(String[] args) {
         log.info("Application has started");
 
-        LoadingController loadingController = new LoadingController();
+        LoadingController loadingController = new LoadingController(
+                new TruckJsonReader(),
+                new ParcelReader(),
+                new LoadingServiceFactory()
+        );
 
         try(Scanner scanner = new Scanner(System.in)) {
             System.out.println("1 - load parcels, 2 - specify parcels");
