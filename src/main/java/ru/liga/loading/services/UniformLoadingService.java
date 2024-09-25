@@ -13,6 +13,7 @@ import java.util.List;
 public class UniformLoadingService implements LoadingService {
 
     private final ParcelUtils parcelUtils = new ParcelUtils();
+    private final ParcelLoader parcelLoader = new ParcelLoader();
 
     @Override
     public List<Truck> loadTrucksWithParcelsWithGivenTrucks(List<Parcel> parcels, List<Truck> trucks) {
@@ -59,20 +60,20 @@ public class UniformLoadingService implements LoadingService {
                 continue;
             }
             while (true) {
-                boolean isSuccessful = tryLoadOnLayer(truck, parcel, layerLevel);
-                if (isSuccessful) {
+                int[] widthAndIndex = truck.getEmptySpaceWidthAndIndexOnLayer(layerLevel);
+                int spaceWidth = widthAndIndex[0], index = widthAndIndex[1];
+
+                boolean possibleToLoad = parcelLoader.possibleToLoad(parcel, truck,
+                        layerLevel, spaceWidth, index);
+
+                if (possibleToLoad) {
+                    parcelLoader.loadParcel(parcel, truck, layerLevel, spaceWidth, index);
                     break;
                 }
                 layerLevel++;
             }
             parcels.remove(parcel);
         }
-    }
-
-    private boolean tryLoadOnLayer(Truck truck, Parcel parcel, int layerLevel) {
-        int[] widthAndIndex = truck.getEmptySpaceWidthAndIndexOnLayer(layerLevel);
-        int spaceWidth = widthAndIndex[0], index = widthAndIndex[1];
-        return truck.tryLoadParcel(parcel, layerLevel, spaceWidth, index);
     }
 
     private void checkEnoughParcelsForTrucks(List<Parcel> parcels, List<Truck> trucks) {

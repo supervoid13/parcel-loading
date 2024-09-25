@@ -12,6 +12,10 @@ import java.util.List;
 public class SimpleLoadingService implements LoadingService {
 
     private final ParcelUtils parcelUtils = new ParcelUtils();
+    private final ParcelLoader parcelLoader = new ParcelLoader();
+
+    private static final int BOTTOM_LAYER_LEVEL = 1;
+    private static final int LAYER_FIRST_INDEX = 0;
 
     @Override
     public List<Truck> loadTrucksWithParcelsWithInfiniteTrucksAmount(List<Parcel> parcels) {
@@ -32,9 +36,11 @@ public class SimpleLoadingService implements LoadingService {
         int i = 0;
         while (!parcels.isEmpty()) {
             Parcel parcelGuess = parcels.get(i);
-            boolean isSuccessful = truck.tryLoadParcel(parcelGuess, 1, Truck.WIDTH_CAPACITY, 0);
+            boolean possibleToLoad = parcelLoader.possibleToLoad(parcelGuess, truck,
+                    BOTTOM_LAYER_LEVEL, Truck.WIDTH_CAPACITY, LAYER_FIRST_INDEX);
 
-            if (isSuccessful) {
+            if (possibleToLoad) {
+                parcelLoader.loadParcel(parcelGuess, truck, BOTTOM_LAYER_LEVEL, Truck.WIDTH_CAPACITY, LAYER_FIRST_INDEX);
                 trucks.add(truck);
                 truck = new Truck();
             } else {

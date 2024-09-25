@@ -2,7 +2,6 @@ package ru.liga.loading.models;
 
 import ru.liga.loading.utils.LoadingUtils;
 import ru.liga.loading.utils.ParcelUtils;
-import ru.liga.loading.utils.TruckUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -86,10 +85,7 @@ public class Truck {
     public int[] getEmptySpaceWidthAndIndexOnLayer(int layerLevel) {
         char[] layer = getLayer(layerLevel);
 
-        int maxLength = 0;
-        int maxIndex = -1;
-        int currentLength = 0;
-        int currentIndex = -1;
+        int maxLength = 0, maxIndex = -1, currentLength = 0, currentIndex = -1;
 
         for (int i = 0; i < layer.length; i++) {
             if (layer[i] == EMPTY_SPACE_DESIGNATION) {
@@ -114,27 +110,19 @@ public class Truck {
         return new int[]{maxLength, maxIndex};
     }
 
-    /**
-     * Метод попытки загрузить посылку {@code parcel} на указанный уровень {@code layerLevel} в свободное место
-     * шириной {@code spaceWidth}, начиная с индекса {@code index}
-     *
-     * @param parcel     посылка, которую нужно загрузить.
-     * @param layerLevel уровень, на который нужно загрузить посылку.
-     * @param spaceWidth ширина свободного места на указанном уровне.
-     * @param index      индекс, с которого нужно начать загрузку.
-     * @return {@code true} если загрузка прошла успешно, {@code false} в противном случае.
-     */
-    public boolean tryLoadParcel(Parcel parcel, int layerLevel, int spaceWidth, int index) {
-        int tempIndex = index;
-        int parcelBottomWidth = parcel.getBottomWidth();
 
-        if (spaceWidth < parcelBottomWidth
-                || !TruckUtils.isBottomLayerValid(this, parcelBottomWidth, layerLevel - 1, index)) {
-            return false;
-        }
+    /**
+     * Метод вставки посылки в кузов грузовика.
+     *
+     * @param parcel     посылка.
+     * @param layerLevel уровень в кузове.
+     * @param index      индекс на уровне.
+     */
+    public void insertParcel(Parcel parcel, int layerLevel, int index) {
+        int tempIndex = index;
+        int deepIndex = HEIGHT_CAPACITY - layerLevel;
 
         char[][] box = parcel.getBox();
-        int deepIndex = HEIGHT_CAPACITY - layerLevel;
 
         for (int i = box.length - 1; i >= 0; i--) {
             for (int j = 0; j < box[i].length; j++) {
@@ -143,7 +131,6 @@ public class Truck {
             deepIndex--;
             index = tempIndex;
         }
-        return true;
     }
 
     /**

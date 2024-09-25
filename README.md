@@ -25,6 +25,8 @@ $ git clone https://github.com/supervoid13/parcel-loading.git
 
 ## Использование
 
+(Файлы для ручного тестирования находятся по пути `src/test/resources/manualtest`)
+
 Выберите действие, которое хотите выполнить (введите в консоль цифру):
 
 ```sh

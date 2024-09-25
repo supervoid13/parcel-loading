@@ -12,6 +12,7 @@ import java.util.List;
 public class EffectiveLoadingService implements LoadingService {
 
     private final ParcelUtils parcelUtils = new ParcelUtils();
+    private final ParcelLoader parcelLoader = new ParcelLoader();
 
     @Override
     public List<Truck> loadTrucksWithParcelsWithInfiniteTrucksAmount(List<Parcel> parcels) {
@@ -49,9 +50,11 @@ public class EffectiveLoadingService implements LoadingService {
             Parcel parcelGuess = parcels.get(parcelIndex);
 
             int spaceWidth = widthAndIndex[0], index = widthAndIndex[1];
-            boolean isSuccessful = truck.tryLoadParcel(parcelGuess, layerLevel, spaceWidth, index);
+            boolean possibleToLoad = parcelLoader.possibleToLoad(parcelGuess, truck,
+                    layerLevel, spaceWidth, index);
 
-            if (isSuccessful) {
+            if (possibleToLoad) {
+                parcelLoader.loadParcel(parcelGuess, truck, layerLevel, spaceWidth, index);
                 parcels.remove(parcelIndex);
                 parcelIndex = 0;
 
