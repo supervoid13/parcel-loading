@@ -1,7 +1,6 @@
 package ru.liga.loading.services;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.liga.loading.exceptions.NotEnoughTrucksException;
 import ru.liga.loading.models.Parcel;
 import ru.liga.loading.models.Truck;
 import ru.liga.loading.utils.ParcelUtils;
@@ -24,38 +23,36 @@ public class EffectiveLoadingService implements LoadingService {
         Truck truck = new Truck();
         trucks.add(truck);
 
-        loadTrucksWithParcels(parcels, trucks, true);
+        loadTrucksWithParcels(parcels, trucks);
 
         log.debug("Method '%s' has finished".formatted(methodName));
         return trucks;
     }
 
-    private void loadTrucksWithParcels(
-            List<Parcel> parcels,
-            List<Truck> trucks,
-            boolean allowNewTrucks
-    ) {
+    private void loadTrucksWithParcels(List<Parcel> parcels, List<Truck> trucks) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         log.debug("Method '%s' has started".formatted(methodName));
 
         log.info("Preparing parcels by bottom width and square");
         List<Parcel> sortedParcels = parcelUtils.prepareParcelsByBottomWidthThenSquare(parcels);
+        load(sortedParcels, trucks);
 
+        log.debug("Method '%s' has finished".formatted(methodName));
+    }
+
+    private void load(List<Parcel> parcels, List<Truck> trucks) {
         int truckIndex = 0, parcelIndex = 0, layerLevel = 1;
-
         Truck truck = trucks.get(truckIndex);
-
         int[] widthAndIndex = truck.getEmptySpaceWidthAndIndexOnLayer(layerLevel);
 
-        while (!sortedParcels.isEmpty()) {
-            Parcel parcelGuess = sortedParcels.get(parcelIndex);
+        while (!parcels.isEmpty()) {
+            Parcel parcelGuess = parcels.get(parcelIndex);
 
             int spaceWidth = widthAndIndex[0], index = widthAndIndex[1];
-
             boolean isSuccessful = truck.tryLoadParcel(parcelGuess, layerLevel, spaceWidth, index);
 
             if (isSuccessful) {
-                sortedParcels.remove(parcelIndex);
+                parcels.remove(parcelIndex);
                 parcelIndex = 0;
 
                 while (!truck.isLayerAvailable(layerLevel) && layerLevel != Truck.HEIGHT_CAPACITY)
@@ -63,18 +60,14 @@ public class EffectiveLoadingService implements LoadingService {
 
                 widthAndIndex = truck.getEmptySpaceWidthAndIndexOnLayer(layerLevel);
 
-            } else if (parcelIndex == sortedParcels.size() - 1) {
+            } else if (parcelIndex == parcels.size() - 1) {
                 if (layerLevel == Truck.HEIGHT_CAPACITY) {
                     if (++truckIndex == trucks.size()) {
-                        if (allowNewTrucks) {
-                            truck = new Truck();
-                            trucks.add(truck);
-                            parcelIndex = 0;
-                            layerLevel = 1;
-                        } else {
-                            log.error("Not enough trucks");
-                            throw new NotEnoughTrucksException("Need more trucks");
-                        }
+                        truck = new Truck();
+                        trucks.add(truck);
+                        parcelIndex = 0;
+                        layerLevel = 1;
+
                     } else {
                         truck = trucks.get(truckIndex);
                         parcelIndex = 0;
@@ -89,7 +82,6 @@ public class EffectiveLoadingService implements LoadingService {
                 parcelIndex++;
             }
         }
-        log.debug("Method '%s' has finished".formatted(methodName));
     }
 
     @Override
