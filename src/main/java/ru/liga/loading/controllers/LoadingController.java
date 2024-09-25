@@ -30,52 +30,15 @@ public class LoadingController {
     public void loadParcels() {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         log.debug("Method '%s' has started".formatted(methodName));
-
-        LoadingService loadingService;
-        String filePath;
-        int modeInt = 0, trucksAmount = -1;
-
-        try (Scanner scanner = new Scanner(System.in)) {
-            System.out.println("Enter file path:");
-            filePath = scanner.nextLine();
-            log.info("File path has been entered");
-
+        try {
+            String filePath = enterFilePath();
             List<Parcel> parcels = parcelReader.readParcelsFromFile(filePath);
 
-            System.out.println("Enter mode (simple - 1, effective - 2, uniform - 3):");
-            modeInt = scanner.nextInt();
-            LoadingMode mode;
+            LoadingMode mode = enterLoadingMode();
+            LoadingService loadingService = loadingServiceFactory.createLoadingServiceFromMode(mode);
 
-            try {
-                mode = LoadingMode.values()[modeInt - 1];
-            } catch (RuntimeException e) {
-                log.warn("Entered invalid mode");
-                throw new UnsupportedOperationException("No such mode");
-            }
-
-            log.info("Mode has been entered");
-
-            loadingService = loadingServiceFactory.createLoadingServiceFromMode(mode);
-
-            List<Truck> trucks;
-
-            log.info("Loading process has started");
-            if (loadingService instanceof UniformLoadingService ) {
-                System.out.println("Enter amount of trucks to load:");
-                trucksAmount = scanner.nextInt();
-                List<Truck> emptyTrucks = LoadingUtils.generateEmptyTrucks(trucksAmount);
-                trucks = loadingService.loadTrucksWithParcelsWithGivenTrucks(parcels, new ArrayList<>(emptyTrucks));
-            } else {
-                trucks = loadingService.loadTrucksWithParcelsWithInfiniteTrucksAmount(parcels);
-            }
-            log.info("Loading has finished");
-
-            log.trace("Displaying truck bodies on screen");
-            for (Truck truck : trucks) {
-                truck.printBody();
-                System.out.println();
-            }
-
+            List<Truck> trucks = loadTrucks(loadingService, parcels);
+            displayTrucks(trucks);
         } catch (IOException e) {
             System.out.println("No such file");
             log.error("File not found");
@@ -87,26 +50,76 @@ public class LoadingController {
 
     /** Эндпоинт для подсчёта посылок в грузовиках из json файла*/
     public void specifyParcels() {
-        try (Scanner scanner = new Scanner(System.in)) {
-            System.out.println("Enter truck json file path:");
-            String filePath = scanner.nextLine();
-
+        String filePath = enterFilePath();
+        try {
             List<Truck> trucks = truckJsonReader.readTrucksFromJson(filePath);
-
-            log.trace("Displaying amount of parcels by rate and truck bodies on screen");
-            for (Truck truck : trucks) {
-                Map<Character, Integer> countedParcels = truck.countParcels();
-
-                for (Map.Entry<Character, Integer> entry : countedParcels.entrySet()) {
-                    System.out.println("Amount of parcels with rate of " + entry.getKey() + " - " + entry.getValue());
-                }
-                System.out.println("Truck's body");
-                truck.printBody();
-            }
-
+            displayParcelAmountAndTruckBodies(trucks);
         } catch (IOException e) {
             System.out.println("No such file");
             log.error("File not found");
+        }
+    }
+
+    private String enterFilePath() {
+        System.out.println("Enter file path:");
+        Scanner scanner = new Scanner(System.in);
+        String filePath = scanner.nextLine();
+        log.info("File path has been entered");
+        return filePath;
+    }
+
+    private LoadingMode enterLoadingMode() {
+        LoadingMode mode;
+        try {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Enter mode (simple - 1, effective - 2, uniform - 3):");
+            int modeInt = scanner.nextInt();
+            mode = LoadingMode.values()[modeInt - 1];
+        } catch (RuntimeException e) {
+            log.warn("Entered invalid mode");
+            throw new UnsupportedOperationException("No such mode");
+        }
+        log.info("Mode has been entered");
+        return mode;
+    }
+
+    private List<Truck> loadTrucks(LoadingService loadingService, List<Parcel> parcels) {
+        log.info("Loading process has started");
+        List<Truck> trucks;
+        if (loadingService instanceof UniformLoadingService ) {
+            int trucksAmount = -1;
+            try (Scanner scanner = new Scanner(System.in)) {
+                System.out.println("Enter amount of trucks to load:");
+                trucksAmount = scanner.nextInt();
+            }
+            List<Truck> emptyTrucks = LoadingUtils.generateEmptyTrucks(trucksAmount);
+            trucks = loadingService.loadTrucksWithParcelsWithGivenTrucks(parcels, new ArrayList<>(emptyTrucks));
+
+        } else {
+            trucks = loadingService.loadTrucksWithParcelsWithInfiniteTrucksAmount(parcels);
+        }
+        log.info("Loading has finished");
+        return trucks;
+    }
+
+    private void displayTrucks(List<Truck> trucks) {
+        log.trace("Displaying truck bodies on screen");
+        for (Truck truck : trucks) {
+            truck.printBody();
+            System.out.println();
+        }
+    }
+
+    private void displayParcelAmountAndTruckBodies(List<Truck> trucks) {
+        log.trace("Displaying amount of parcels by rate and truck bodies on screen");
+        for (Truck truck : trucks) {
+            Map<Character, Integer> countedParcels = truck.countParcels();
+
+            for (Map.Entry<Character, Integer> entry : countedParcels.entrySet()) {
+                System.out.println("Amount of parcels with rate of " + entry.getKey() + " - " + entry.getValue());
+            }
+            System.out.println("Truck's body");
+            truck.printBody();
         }
     }
 }
