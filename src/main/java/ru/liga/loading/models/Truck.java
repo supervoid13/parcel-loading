@@ -1,6 +1,7 @@
 package ru.liga.loading.models;
 
 import ru.liga.loading.utils.LoadingUtils;
+import ru.liga.loading.utils.ParcelUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,22 +15,40 @@ public class Truck {
     public static final int HEIGHT_CAPACITY = 6;
     public static final int BODY_SQUARE = WIDTH_CAPACITY * HEIGHT_CAPACITY;
     public static final char EMPTY_SPACE_DESIGNATION = '\u0000';
-    private final static int CHAR_TO_DIGIT_DIFF = 48;
 
     private final char[][] body;
 
+    /**
+     * Конструктор - создание нового объекта и инициализация пустого кузова исходя из емкости.
+     */
     public Truck() {
         body = new char[HEIGHT_CAPACITY][WIDTH_CAPACITY];
     }
 
+    /**
+     * Конструктор - создание нового объекта и инициализация кузова переданным кузовом.
+     *
+     * @param body кузов, с которым нужно создать объект грузовика.
+     */
     public Truck(char[][] body) {
         this.body = LoadingUtils.getArrayCopy(body);
     }
 
+
+    /**
+     * Получение значение поля {@link Truck#body}
+     *
+     * @return копия кузова грузовика
+     */
     public char[][] getBody() {
         return LoadingUtils.getArrayCopy(body);
     }
 
+    /**
+     * Получение занятого места в кузове.
+     *
+     * @return площадь кузова, занятая посылками.
+     */
     public int getOccupiedSpaceSquare() {
         int square = 0;
 
@@ -42,21 +61,31 @@ public class Truck {
         return square;
     }
 
+    /**
+     * Получение свободного места в кузове.
+     *
+     * @return площадь кузова, свободная от посылок.
+     */
     public int getEmptySpaceSquare() {
         return BODY_SQUARE - getOccupiedSpaceSquare();
     }
 
-    private char[] getLayer(int layerLevel) {
-        return body[HEIGHT_CAPACITY - layerLevel];
+    public char[] getLayer(int layerLevel) {
+        char[] layer = body[HEIGHT_CAPACITY - layerLevel];
+        return Arrays.copyOf(layer, layer.length);
     }
 
+    /**
+     * Получение массива двух элементов: ширину свободного места и индекс его начала, соответственно,
+     * на указанном уровне {@code layerLevel}.
+     *
+     * @param layerLevel уровень высоты в кузове. Начинается с 1.
+     * @return массив двух элементов: ширина и индекс начала.
+     */
     public int[] getEmptySpaceWidthAndIndexOnLayer(int layerLevel) {
         char[] layer = getLayer(layerLevel);
 
-        int maxLength = 0;
-        int maxIndex = -1;
-        int currentLength = 0;
-        int currentIndex = -1;
+        int maxLength = 0, maxIndex = -1, currentLength = 0, currentIndex = -1;
 
         for (int i = 0; i < layer.length; i++) {
             if (layer[i] == EMPTY_SPACE_DESIGNATION) {
@@ -81,17 +110,19 @@ public class Truck {
         return new int[]{maxLength, maxIndex};
     }
 
-    public boolean tryLoadParcel(Parcel parcel, int layerLevel, int spaceWidth, int index) {
-        int tempIndex = index;
-        int parcelBottomWidth = parcel.getBottomWidth();
 
-        if (spaceWidth < parcelBottomWidth || !isBottomLayerValid(parcelBottomWidth, layerLevel - 1, index)) {
-            return false;
-        }
+    /**
+     * Метод вставки посылки в кузов грузовика.
+     *
+     * @param parcel     посылка.
+     * @param layerLevel уровень в кузове.
+     * @param index      индекс на уровне.
+     */
+    public void insertParcel(Parcel parcel, int layerLevel, int index) {
+        int tempIndex = index;
+        int deepIndex = HEIGHT_CAPACITY - layerLevel;
 
         char[][] box = parcel.getBox();
-
-        int deepIndex = HEIGHT_CAPACITY - layerLevel;
 
         for (int i = box.length - 1; i >= 0; i--) {
             for (int j = 0; j < box[i].length; j++) {
@@ -100,23 +131,14 @@ public class Truck {
             deepIndex--;
             index = tempIndex;
         }
-        return true;
     }
 
-    public boolean isBottomLayerValid(int parcelBottomWidth, int bottomLayerLevel, int index) {
-        if (bottomLayerLevel == 0) return true;
-
-        int supportWidthCounter = 0;
-        char[] layer = getLayer(bottomLayerLevel);
-
-        for (int i = index; i < WIDTH_CAPACITY; i++) {
-            if (layer[i] != EMPTY_SPACE_DESIGNATION)
-                supportWidthCounter++;
-        }
-
-        return supportWidthCounter > parcelBottomWidth / 2;
-    }
-
+    /**
+     * Метод проверки уровня в кузове на полную загруженность.
+     *
+     * @param layerLevel уровень в кузове, который нужно проверить.
+     * @return {@code true} если на уровне остались свободные ячейки, {@code false} если все ячейки заняты
+     */
     public boolean isLayerAvailable(int layerLevel) {
         char[] layer = getLayer(layerLevel);
 
@@ -127,6 +149,12 @@ public class Truck {
         return false;
     }
 
+    /**
+     * Метод определения, какие посылки лежат в грузовике и их количества.
+     *
+     * @return {@code Map}, где {@code key} - символьный идентификатор посылки, {@code value} - количество
+     * таких посылок
+     */
     public Map<Character, Integer> countParcels() {
         Map<Character, Integer> result = new HashMap<>();
 
@@ -140,14 +168,13 @@ public class Truck {
         return result.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        entry -> entry.getValue() / squareFromParcelChar(entry.getKey())
+                        entry -> entry.getValue() / ParcelUtils.squareFromParcelChar(entry.getKey())
                 ));
     }
 
-    private int squareFromParcelChar(char parcelChar) {
-        return parcelChar - CHAR_TO_DIGIT_DIFF;
-    }
-
+    /**
+     * Метод печати кузова грузовика {@link Truck#body} в удобно-читаемом виде
+     */
     public void printBody() {
         StringBuilder sb = new StringBuilder();
 

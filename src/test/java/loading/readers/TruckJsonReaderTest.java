@@ -21,17 +21,17 @@ public class TruckJsonReaderTest {
     }
 
     @Test
-    public void readParcelsFromJson_givenInvalidJson_shouldThrowTruckValidationException() {
+    public void readTrucksFromJson_givenInvalidJson_shouldThrowTruckValidationException() {
         String filePath = getClass().getClassLoader().getResource("invalid_trucks.json").getPath();
 
-        assertThatThrownBy(() -> truckJsonReader.readParcelsFromJson(filePath))
+        assertThatThrownBy(() -> truckJsonReader.readTrucksFromJson(filePath))
                 .isInstanceOf(TruckValidationException.class);
     }
 
     @Test
-    public void readParcelsFromJson_givenValidJson_shouldReturnCorrectTruckList() throws IOException {
+    public void readTrucksFromJson_givenValidJson_shouldReturnCorrectTruckList() throws IOException {
         String filePath = getClass().getClassLoader().getResource("valid_trucks.json").getPath();
-        List<Truck> actualTrucks = truckJsonReader.readParcelsFromJson(filePath);
+        List<Truck> actualTrucks = truckJsonReader.readTrucksFromJson(filePath);
         List<Truck> expectedTrucks = getTrucks();
 
         assertThat(actualTrucks).isEqualTo(expectedTrucks);

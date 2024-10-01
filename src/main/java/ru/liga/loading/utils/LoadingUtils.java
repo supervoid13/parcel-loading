@@ -1,13 +1,20 @@
 package ru.liga.loading.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.liga.loading.models.Truck;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+@Slf4j
 public class LoadingUtils {
 
+    /**
+     * Метод копирования двумерного массива.
+     * @param array исходный массив.
+     * @return копию двумерного массива.
+     */
     public static char[][] getArrayCopy(char[][] array) {
         char[][] copy = new char[array.length][];
 
@@ -18,9 +25,21 @@ public class LoadingUtils {
         return copy;
     }
 
+    /**
+     * Метод генерирования пустых грузовиков заданного количества.
+     * @param trucksAmount количество грузовиков.
+     * @return список пустых грузовиков.
+     */
     public static List<Truck> generateEmptyTrucks(int trucksAmount) {
-        return Stream.generate(Truck::new)
-                .limit(trucksAmount)
-                .toList();
+        try {
+            List<Truck> trucks = Stream.generate(Truck::new)
+                    .limit(trucksAmount)
+                    .toList();
+            log.info("Amount of trucks - %d".formatted(trucksAmount));
+            return trucks;
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid amount of trucks");
+            throw new IllegalArgumentException("Invalid amount of trucks");
+        }
     }
 }

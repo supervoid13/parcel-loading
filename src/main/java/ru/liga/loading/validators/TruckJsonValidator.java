@@ -23,20 +23,24 @@ public class TruckJsonValidator {
             '9', 3
     );
 
+    /**
+     * Валидация кузова грузовика.
+     * @param body кузов грузовика.
+     * @throws TruckValidationException если кузов грузовика невалиден.
+     */
     public void validate(char[][] body) {
         Set<String> validIndexes = new HashSet<>();
 
         for (int i = Truck.HEIGHT_CAPACITY - 1; i >= 0; i--) {
             for (int j = 0; j < Truck.WIDTH_CAPACITY; j++) {
-                if (isCharAtIndexesAlreadyChecked(i, j, validIndexes)) continue;
-
                 char parcelChar = body[i][j];
 
-                if (parcelChar == Truck.EMPTY_SPACE_DESIGNATION) continue;
+                if (isCharAtIndexesAlreadyChecked(i, j, validIndexes)
+                        || parcelChar == Truck.EMPTY_SPACE_DESIGNATION) {
+                    continue;
+                }
 
-                int parcelWidth = parcelCharWidth.get(parcelChar);
-                int parcelSquare = parcelChar - '0';
-
+                int parcelWidth = parcelCharWidth.get(parcelChar), parcelSquare = parcelChar - '0';
                 int counter = 1, parcelLayer = Truck.HEIGHT_CAPACITY - i, parcelBodyIndexOnLayer = 1;
 
                 while (counter < parcelSquare) {
