@@ -21,7 +21,7 @@ $ git clone https://github.com/supervoid13/parcel-loading.git
 
 2. Откройте проект в любой удобной для Вас среде разработки, например, IntelliJ IDEA.
 
-3. Запустите метод `main` в `ru.liga.Main.java`.
+3. Запустите метод `main` в `ru.liga.loading.ParcelLoadingApplication.java`.
 
 ## Использование
 

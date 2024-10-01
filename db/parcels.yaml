@@ -1,0 +1,67 @@
+!!ru.liga.loading.models.Parcel
+box:
+- ['1']
+name: one
+symbol: '1'
+--- !!ru.liga.loading.models.Parcel
+box:
+- ['2', '2']
+name: two
+symbol: '2'
+--- !!ru.liga.loading.models.Parcel
+box:
+- ['3', '3', '3']
+name: three
+symbol: '3'
+--- !!ru.liga.loading.models.Parcel
+box:
+- ['4', '4', '4', '4']
+name: four
+symbol: '4'
+--- !!ru.liga.loading.models.Parcel
+box:
+- ['5', '5', '5', '5', '5']
+name: five
+symbol: '5'
+--- !!ru.liga.loading.models.Parcel
+box:
+- ['6', '6', '6']
+- ['6', '6', '6']
+name: six
+symbol: '6'
+--- !!ru.liga.loading.models.Parcel
+box:
+- ['7', '7', '7']
+- ['7', '7', '7', '7']
+name: seven
+symbol: '7'
+--- !!ru.liga.loading.models.Parcel
+box:
+- ['8', '8', '8', '8']
+- ['8', '8', '8', '8']
+name: eight
+symbol: '8'
+--- !!ru.liga.loading.models.Parcel
+box:
+- ['9', '9', '9']
+- ['9', '9', '9']
+- ['9', '9', '9']
+name: nine
+symbol: '9'
+--- !!ru.liga.loading.models.Parcel
+box:
+- ['-', '-', '-']
+name: stick
+symbol: '-'
+--- !!ru.liga.loading.models.Parcel
+box:
+- ['#', ' ', ' ', ' ', ' ', ' ', ' ', '#']
+- ['#', '#', '#', '#', '#', '#', '#', '#']
+- ['#', ' ', ' ', ' ', ' ', ' ', ' ', '#']
+name: barbell
+symbol: '#'
+--- !!ru.liga.loading.models.Parcel
+box:
+- [t]
+name: test
+symbol: t

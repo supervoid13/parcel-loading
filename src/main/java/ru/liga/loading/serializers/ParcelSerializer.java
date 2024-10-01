@@ -1,26 +1,32 @@
 package ru.liga.loading.serializers;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import ru.liga.loading.exceptions.ParcelValidationException;
 import ru.liga.loading.models.Parcel;
 import ru.liga.loading.validators.ParcelValidator;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class ParcelSerializer {
 
-    private final ParcelValidator parcelValidator = new ParcelValidator();
+    private final ParcelValidator parcelValidator;
 
     /**
-     * Десериализация посылок из строки
-     * @param parcelsStr строка с посылками
-     * @return список посылок
-     * @throws ParcelValidationException если снимки посылок в строке невалидны
+     * Десериализация посылок из строки.
+     * @param parcelsStr строка с посылками.
+     * @return список посылок.
+     * @throws ParcelValidationException если снимки посылок в строке невалидны.
+     * @throws FileNotFoundException если не найден файл с посылками.
      */
-    public List<Parcel> deserializeList(String parcelsStr) {
+    public List<Parcel> deserializeList(String parcelsStr) throws FileNotFoundException {
 
         String[] parcelsStrArray = parcelsStr.split("\\n{2,}");
 
@@ -28,9 +34,8 @@ public class ParcelSerializer {
 
         log.info("Parcel validation has started");
         for (String parcelStr : parcelsStrArray) {
-            parcelValidator.validate(parcelStr);
-
             Parcel parcel = deserialize(parcelStr);
+            parcelValidator.validateExisting(parcel);
             parcels.add(parcel);
         }
         log.info("All parcels are valid");

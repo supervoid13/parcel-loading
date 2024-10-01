@@ -1,6 +1,8 @@
 package ru.liga.loading.readers;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import ru.liga.loading.models.Truck;
 import ru.liga.loading.serializers.TruckSerializer;
 
@@ -10,9 +12,11 @@ import java.nio.file.Path;
 import java.util.List;
 
 @Slf4j
+@RequiredArgsConstructor
+@Component
 public class TruckJsonReader {
 
-    private final TruckSerializer truckSerializer = new TruckSerializer();
+    private final TruckSerializer truckSerializer;
 
     /**
      * Метод чтения грузовиков из json файла.

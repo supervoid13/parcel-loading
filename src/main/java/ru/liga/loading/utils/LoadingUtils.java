@@ -1,6 +1,7 @@
 package ru.liga.loading.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.liga.loading.exceptions.NotEnoughTrucksException;
 import ru.liga.loading.models.Truck;
 
 import java.util.Arrays;
@@ -30,9 +31,10 @@ public class LoadingUtils {
      * @param trucksAmount количество грузовиков.
      * @return список пустых грузовиков.
      */
-    public static List<Truck> generateEmptyTrucks(int trucksAmount) {
+    public static List<Truck> generateEmptyTrucks(int trucksAmount, int width, int height) {
+        if (trucksAmount < 1) throw new NotEnoughTrucksException("Amount of trucks must be 1 or greater");
         try {
-            List<Truck> trucks = Stream.generate(Truck::new)
+            List<Truck> trucks = Stream.generate(() -> new Truck(width, height))
                     .limit(trucksAmount)
                     .toList();
             log.info("Amount of trucks - %d".formatted(trucksAmount));

@@ -2,124 +2,129 @@ package ru.liga.loading.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellOption;
 import ru.liga.loading.enums.LoadingMode;
-import ru.liga.loading.exceptions.NotEnoughParcelsException;
-import ru.liga.loading.exceptions.NotEnoughTrucksException;
 import ru.liga.loading.models.Parcel;
 import ru.liga.loading.models.Truck;
 import ru.liga.loading.readers.ParcelReader;
 import ru.liga.loading.readers.TruckJsonReader;
-import ru.liga.loading.services.*;
+import ru.liga.loading.services.LoadingService;
+import ru.liga.loading.services.LoadingServiceFactory;
+import ru.liga.loading.services.ParcelService;
+import ru.liga.loading.services.TruckService;
+import ru.liga.loading.services.UniformLoadingService;
 import ru.liga.loading.utils.LoadingUtils;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
 
 @Slf4j
 @RequiredArgsConstructor
+@ShellComponent
 public class LoadingController {
 
     private final TruckJsonReader truckJsonReader;
     private final ParcelReader parcelReader;
     private final LoadingServiceFactory loadingServiceFactory;
+    private final TruckService truckService;
+    private final ParcelService parcelService;
+
 
     /** Эндпоинт для погрузки посылок в грузовики */
-    public void loadParcels() {
+    @ShellMethod(key = "load")
+    public void loadParcels(
+            String file,
+            String mode,
+            @ShellOption(defaultValue = "-1") int trucks,
+            @ShellOption(defaultValue = "6") int height,
+            @ShellOption(defaultValue = "6") int width
+    ) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         log.debug("Method '%s' has started".formatted(methodName));
         try {
-            String filePath = enterFilePath();
-            List<Parcel> parcels = parcelReader.readParcelsFromFile(filePath);
+            List<Parcel> parcels = parcelReader.readParcelsFromFile(file);
+            LoadingMode loadingMode = LoadingMode.valueOf(mode.toUpperCase());
+            LoadingService loadingService = loadingServiceFactory.createLoadingServiceFromMode(loadingMode);
 
-            LoadingMode mode = enterLoadingMode();
-            LoadingService loadingService = loadingServiceFactory.createLoadingServiceFromMode(mode);
-
-            List<Truck> trucks = loadTrucks(loadingService, parcels);
-            displayTrucks(trucks);
+            List<Truck> loadedTrucks = loadTrucks(loadingService, parcels, trucks, width, height);
+            truckService.displayTrucks(loadedTrucks);
         } catch (IOException e) {
             System.out.println("No such file");
             log.error("File not found");
-        } catch (NotEnoughTrucksException | NotEnoughParcelsException e) {
-            System.out.println(e.getMessage());
         }
         log.debug("Method '%s' has finished".formatted(methodName));
     }
 
-    /** Эндпоинт для подсчёта посылок в грузовиках из json файла*/
-    public void specifyParcels() {
-        String filePath = enterFilePath();
+    /** Эндпоинт для подсчёта посылок в грузовиках из json файла */
+    @ShellMethod(key = "specify")
+    public void specifyParcels(String file) {
         try {
-            List<Truck> trucks = truckJsonReader.readTrucksFromJson(filePath);
-            displayParcelAmountAndTruckBodies(trucks);
+            List<Truck> trucks = truckJsonReader.readTrucksFromJson(file);
+            truckService.displayParcelAmountAndTruckBodies(trucks);
         } catch (IOException e) {
             System.out.println("No such file");
             log.error("File not found");
         }
     }
 
-    private String enterFilePath() {
-        System.out.println("Enter file path:");
-        Scanner scanner = new Scanner(System.in);
-        String filePath = scanner.nextLine();
-        log.info("File path has been entered");
-        return filePath;
+    /**
+     * Метод для отображения посылок (определённую посылку, если имя указано, все посылки - в противном случае).
+     * @param name имя посылки (необязательно).
+     * @throws FileNotFoundException если файл с посылками не найден.
+     */
+    @ShellMethod(key = "parcels")
+    public void displayParcels(@ShellOption(defaultValue = "") String name) throws FileNotFoundException {
+        if (name.isBlank())
+            parcelService.displayParcels();
+        else
+            parcelService.displayParcel(name);
     }
 
-    private LoadingMode enterLoadingMode() {
-        LoadingMode mode;
-        try {
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("Enter mode (simple - 1, effective - 2, uniform - 3):");
-            int modeInt = scanner.nextInt();
-            mode = LoadingMode.values()[modeInt - 1];
-        } catch (RuntimeException e) {
-            log.warn("Entered invalid mode");
-            throw new UnsupportedOperationException("No such mode");
-        }
-        log.info("Mode has been entered");
-        return mode;
+    /**
+     * Эндпоинт для создания новой посылки.
+     * @param name имя посылки.
+     * @param symbol символ формы.
+     * @throws IOException если произошла ошибка чтения формы посылки.
+     */
+    @ShellMethod(key = "create")
+    public void createParcel(String name, char symbol) throws IOException {
+        parcelService.save(name, symbol);
     }
 
-    private List<Truck> loadTrucks(LoadingService loadingService, List<Parcel> parcels) {
+    @ShellMethod(key = "update")
+    public void updateParcel(
+            String name,
+            @ShellOption(defaultValue = "") String newName,
+            @ShellOption(defaultValue = " ") char newSymbol
+    ) throws IOException {
+        parcelService.update(name, newName, newSymbol);
+    }
+
+    @ShellMethod(key = "delete")
+    public void deleteParcel(String name) throws IOException {
+        parcelService.delete(name);
+    }
+
+    private List<Truck> loadTrucks(
+            LoadingService loadingService,
+            List<Parcel> parcels,
+            int trucks,
+            int width,
+            int height
+    ) {
         log.info("Loading process has started");
-        List<Truck> trucks;
+        List<Truck> loadedTrucks;
         if (loadingService instanceof UniformLoadingService ) {
-            int trucksAmount = -1;
-            try (Scanner scanner = new Scanner(System.in)) {
-                System.out.println("Enter amount of trucks to load:");
-                trucksAmount = scanner.nextInt();
-            }
-            List<Truck> emptyTrucks = LoadingUtils.generateEmptyTrucks(trucksAmount);
-            trucks = loadingService.loadTrucksWithParcelsWithGivenTrucks(parcels, new ArrayList<>(emptyTrucks));
-
+            List<Truck> emptyTrucks = LoadingUtils.generateEmptyTrucks(trucks, width, height);
+            loadedTrucks = loadingService.loadTrucksWithParcelsWithGivenTrucks(parcels, new ArrayList<>(emptyTrucks));
         } else {
-            trucks = loadingService.loadTrucksWithParcelsWithInfiniteTrucksAmount(parcels);
+            loadedTrucks = loadingService.loadTrucksWithParcelsWithInfiniteTrucksAmount(parcels, width, height);
         }
         log.info("Loading has finished");
-        return trucks;
-    }
-
-    private void displayTrucks(List<Truck> trucks) {
-        log.trace("Displaying truck bodies on screen");
-        for (Truck truck : trucks) {
-            truck.printBody();
-            System.out.println();
-        }
-    }
-
-    private void displayParcelAmountAndTruckBodies(List<Truck> trucks) {
-        log.trace("Displaying amount of parcels by rate and truck bodies on screen");
-        for (Truck truck : trucks) {
-            Map<Character, Integer> countedParcels = truck.countParcels();
-
-            for (Map.Entry<Character, Integer> entry : countedParcels.entrySet()) {
-                System.out.println("Amount of parcels with rate of " + entry.getKey() + " - " + entry.getValue());
-            }
-            System.out.println("Truck's body");
-            truck.printBody();
-        }
+        return loadedTrucks;
     }
 }

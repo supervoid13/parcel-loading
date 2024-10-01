@@ -1,29 +1,39 @@
 package ru.liga.loading.utils;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import ru.liga.loading.models.Truck;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Component
+@RequiredArgsConstructor
 public class TruckUtils {
 
+    private final ParcelUtils parcelUtils;
+
     /**
-     * Метод проверки валидности уровня под уровнем {@code bottomLayerLevel} в грузовике {@code} truck для загрузки посылки с шириной
-     * основания {@code parcelBottomWidth}.
+     * Метод определения, какие посылки лежат в грузовике и их количества.
      *
-     * @param truck грузовик для проверки уровня
-     * @param parcelBottomWidth ширина основания посылки
-     * @param bottomLayerLevel  уровень в кузове, на который идёт попытка загрузить посылку
-     * @param index             индекс на уровне {@code bottomLaterLevel} с которого идёт загрузка посылки
-     * @return {@code true} если ширина занятого пространства под посылкой больше половины ширины основания посылки
+     * @return {@code Map}, где {@code key} - символьный идентификатор посылки, {@code value} - количество
+     * таких посылок
      */
-    public static boolean isBottomLayerValid(Truck truck, int parcelBottomWidth, int bottomLayerLevel, int index) {
-        if (bottomLayerLevel == 0) return true;
+    public Map<Character, Integer> countParcels(Truck truck) {
+        Map<Character, Integer> result = new HashMap<>();
 
-        int supportWidthCounter = 0;
-        char[] layer = truck.getLayer(bottomLayerLevel);
-
-        for (int i = index; i < Truck.WIDTH_CAPACITY; i++) {
-            if (layer[i] != Truck.EMPTY_SPACE_DESIGNATION)
-                supportWidthCounter++;
+        for (char[] layer : truck.getBody()) {
+            for (char ch : layer) {
+                if (ch != Truck.EMPTY_SPACE_DESIGNATION)
+                    result.put(ch, result.getOrDefault(ch, 0) + 1);
+            }
         }
-        return supportWidthCounter > parcelBottomWidth / 2;
+
+        return result.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue() / parcelUtils.calculateSquareFromSymbol(entry.getKey())
+                ));
     }
 }

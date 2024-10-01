@@ -1,28 +1,36 @@
-package loading.services;
+package ru.liga.loading.services;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
 import ru.liga.loading.models.Parcel;
 import ru.liga.loading.models.Truck;
-import ru.liga.loading.services.LoadingService;
-import ru.liga.loading.services.SimpleLoadingService;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest(properties = "spring.shell.interactive.enabled=false")
 public class SimpleLoadingServiceTest {
 
-    private LoadingService loadingService;
+    private static final int DEFAULT_WIDTH = 6;
+    private static final int DEFAULT_HEIGHT = 6;
 
-    @BeforeEach
-    public void setup() {
-        loadingService = new SimpleLoadingService();
+    private final LoadingService loadingService;
+
+    @Autowired
+    public SimpleLoadingServiceTest(@Qualifier("simple") LoadingService loadingService) {
+        this.loadingService = loadingService;
     }
 
     @Test
     public void loadTrucksWithParcels_givenParcelList_shouldReturnLoadedTruckList() {
-        List<Truck> actualTrucks = loadingService.loadTrucksWithParcelsWithInfiniteTrucksAmount(getParcels());
+        List<Truck> actualTrucks = loadingService.loadTrucksWithParcelsWithInfiniteTrucksAmount(
+                getParcels(),
+                DEFAULT_WIDTH,
+                DEFAULT_HEIGHT
+        );
         List<Truck> expectedTrucks = getTrucks();
 
         assertThat(actualTrucks).isEqualTo(expectedTrucks);

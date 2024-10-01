@@ -1,21 +1,22 @@
-package loading.validators;
+package ru.liga.loading.validators;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import ru.liga.loading.exceptions.TruckValidationException;
 import ru.liga.loading.models.Truck;
-import ru.liga.loading.validators.TruckJsonValidator;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@SpringBootTest(properties = "spring.shell.interactive.enabled=false")
 public class TruckJsonValidatorTest {
 
-    private TruckJsonValidator truckJsonValidator;
+    private final TruckJsonValidator truckJsonValidator;
 
-    @BeforeEach
-    public void setup() {
-        truckJsonValidator = new TruckJsonValidator();
+    @Autowired
+    public TruckJsonValidatorTest(TruckJsonValidator truckJsonValidator) {
+        this.truckJsonValidator = truckJsonValidator;
     }
 
     @Test

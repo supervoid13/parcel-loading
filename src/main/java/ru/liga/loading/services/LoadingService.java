@@ -12,7 +12,7 @@ public interface LoadingService {
      * @param parcels список посылок.
      * @return список погруженных грузовиков.
      */
-    List<Truck> loadTrucksWithParcelsWithInfiniteTrucksAmount(List<Parcel> parcels);
+    List<Truck> loadTrucksWithParcelsWithInfiniteTrucksAmount(List<Parcel> parcels, int truckWidth, int truckHeight);
 
     /**
      * Метод погрузки посылок в указанные грузовики.
@@ -24,13 +24,16 @@ public interface LoadingService {
 
     /**
      * Метод определения возможности погрузки списка посылок.
-     * @param trucksAmount количество грузовиков.
+     * @param trucks грузовики, которые нужно загрузить.
      * @param parcels список посылок.
      * @return {@code true} если возможно погрузить все посылки в заданное количество грузовиков, {@code false}
      * в противном случае.
      */
-    default boolean isLoadingPossible(int trucksAmount, List<Parcel> parcels) {
-        int trucksBodyTotalSquare = trucksAmount * Truck.BODY_SQUARE;
+    default boolean isLoadingPossible(List<Truck> trucks, List<Parcel> parcels) {
+        int trucksBodyTotalSquare = trucks.stream()
+                .map(Truck::getEmptySpaceSquare)
+                .mapToInt(x -> x)
+                .sum();
 
         int parcelsBoxesTotalSquare = parcels.stream()
                 .map(Parcel::getSquare)

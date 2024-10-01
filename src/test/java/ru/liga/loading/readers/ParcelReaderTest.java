@@ -1,23 +1,24 @@
-package loading.readers;
+package ru.liga.loading.readers;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import ru.liga.loading.models.Parcel;
-import ru.liga.loading.readers.ParcelReader;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest(properties = "spring.shell.interactive.enabled=false")
 public class ParcelReaderTest {
 
-    private ParcelReader parcelReader;
+    private final ParcelReader parcelReader;
 
-    @BeforeEach
-    public void setup() {
-        parcelReader = new ParcelReader();
+    @Autowired
+    public ParcelReaderTest(ParcelReader parcelReader) {
+        this.parcelReader = parcelReader;
     }
 
     @Test

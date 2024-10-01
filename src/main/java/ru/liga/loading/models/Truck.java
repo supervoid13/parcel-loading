@@ -1,28 +1,33 @@
 package ru.liga.loading.models;
 
+import lombok.Value;
+import ru.liga.loading.exceptions.NotEnoughSpaceException;
 import ru.liga.loading.utils.LoadingUtils;
-import ru.liga.loading.utils.ParcelUtils;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
+@Value
 public class Truck {
 
-    public static final int WIDTH_CAPACITY = 6;
-    public static final int HEIGHT_CAPACITY = 6;
-    public static final int BODY_SQUARE = WIDTH_CAPACITY * HEIGHT_CAPACITY;
-    public static final char EMPTY_SPACE_DESIGNATION = '\u0000';
+    public static final char EMPTY_SPACE_DESIGNATION = ' ';
 
-    private final char[][] body;
+    int width;
+    int height;
+    char[][] body;
 
     /**
-     * Конструктор - создание нового объекта и инициализация пустого кузова исходя из емкости.
+     * Конструктор - создание нового объекта с указанной шириной и высотой.
+     * @param width ширина
+     * @param height высота
      */
-    public Truck() {
-        body = new char[HEIGHT_CAPACITY][WIDTH_CAPACITY];
+    public Truck(int width, int height) {
+        this.width = width;
+        this.height = height;
+        body = new char[height][width];
+        for (char[] layer : body) {
+            Arrays.fill(layer, EMPTY_SPACE_DESIGNATION);
+        }
     }
 
     /**
@@ -31,6 +36,8 @@ public class Truck {
      * @param body кузов, с которым нужно создать объект грузовика.
      */
     public Truck(char[][] body) {
+        height = body.length;
+        width = body[0].length;
         this.body = LoadingUtils.getArrayCopy(body);
     }
 
@@ -67,11 +74,11 @@ public class Truck {
      * @return площадь кузова, свободная от посылок.
      */
     public int getEmptySpaceSquare() {
-        return BODY_SQUARE - getOccupiedSpaceSquare();
+        return width * height - getOccupiedSpaceSquare();
     }
 
     public char[] getLayer(int layerLevel) {
-        char[] layer = body[HEIGHT_CAPACITY - layerLevel];
+        char[] layer = body[height - layerLevel];
         return Arrays.copyOf(layer, layer.length);
     }
 
@@ -120,16 +127,20 @@ public class Truck {
      */
     public void insertParcel(Parcel parcel, int layerLevel, int index) {
         int tempIndex = index;
-        int deepIndex = HEIGHT_CAPACITY - layerLevel;
+        int deepIndex = height - layerLevel;
 
         char[][] box = parcel.getBox();
 
-        for (int i = box.length - 1; i >= 0; i--) {
-            for (int j = 0; j < box[i].length; j++) {
-                body[deepIndex][index++] = box[i][j];
+        try {
+            for (int i = box.length - 1; i >= 0; i--) {
+                for (int j = 0; j < box[i].length; j++) {
+                    body[deepIndex][index++] = box[i][j];
+                }
+                deepIndex--;
+                index = tempIndex;
             }
-            deepIndex--;
-            index = tempIndex;
+        } catch (IndexOutOfBoundsException e) {
+            throw new NotEnoughSpaceException("Parcels doesn't fit given trucks");
         }
     }
 
@@ -150,29 +161,6 @@ public class Truck {
     }
 
     /**
-     * Метод определения, какие посылки лежат в грузовике и их количества.
-     *
-     * @return {@code Map}, где {@code key} - символьный идентификатор посылки, {@code value} - количество
-     * таких посылок
-     */
-    public Map<Character, Integer> countParcels() {
-        Map<Character, Integer> result = new HashMap<>();
-
-        for (char[] layer : body) {
-            for (char ch : layer) {
-                if (ch != Truck.EMPTY_SPACE_DESIGNATION)
-                    result.put(ch, result.getOrDefault(ch, 0) + 1);
-            }
-        }
-
-        return result.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> entry.getValue() / ParcelUtils.squareFromParcelChar(entry.getKey())
-                ));
-    }
-
-    /**
      * Метод печати кузова грузовика {@link Truck#body} в удобно-читаемом виде
      */
     public void printBody() {
@@ -185,7 +173,7 @@ public class Truck {
             }
             sb.append("+\n");
         }
-        sb.append("++++++++");
+        sb.append("+".repeat(width)).append("++");
 
         System.out.println(sb);
     }
