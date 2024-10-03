@@ -48,20 +48,3 @@ box:
 - ['9', '9', '9']
 name: nine
 symbol: '9'
---- !!ru.liga.loading.models.Parcel
-box:
-- ['-', '-', '-']
-name: stick
-symbol: '-'
---- !!ru.liga.loading.models.Parcel
-box:
-- ['#', ' ', ' ', ' ', ' ', ' ', ' ', '#']
-- ['#', '#', '#', '#', '#', '#', '#', '#']
-- ['#', ' ', ' ', ' ', ' ', ' ', ' ', '#']
-name: barbell
-symbol: '#'
---- !!ru.liga.loading.models.Parcel
-box:
-- [t]
-name: test
-symbol: t

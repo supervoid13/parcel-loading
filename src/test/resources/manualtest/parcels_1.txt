@@ -13,6 +13,12 @@
 
 333
 
-#      #
-########
-#      #
+oooo
+o  o
+o  o
+oooo
+
+oooo
+o  o
+o  o
+oooo

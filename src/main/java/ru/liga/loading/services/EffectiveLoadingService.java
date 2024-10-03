@@ -3,6 +3,7 @@ package ru.liga.loading.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.liga.loading.exceptions.NotEnoughSpaceException;
 import ru.liga.loading.models.Parcel;
 import ru.liga.loading.models.Truck;
 import ru.liga.loading.utils.ParcelLoader;
@@ -65,7 +66,14 @@ public class EffectiveLoadingService implements LoadingService {
                     layerLevel, spaceWidth, index);
 
             if (possibleToLoad) {
-                parcelLoader.loadParcel(parcelGuess, truck, layerLevel, spaceWidth, index);
+                try {
+                    parcelLoader.loadParcel(parcelGuess, truck, layerLevel, spaceWidth, index);
+                } catch (NotEnoughSpaceException e) {
+                    truck = new Truck(truckWidth, truckHeight);
+                    trucks.add(truck);
+                    parcelIndex = 0;
+                    layerLevel = 1;
+                }
                 parcels.remove(parcelIndex);
                 parcelIndex = 0;
 

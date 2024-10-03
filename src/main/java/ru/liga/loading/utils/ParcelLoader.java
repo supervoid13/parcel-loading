@@ -41,10 +41,14 @@ public class ParcelLoader {
      * @return {@code true} если возможно погрузить посылку, {@code false} в противном случае
      */
     public boolean possibleToLoad(Parcel parcel, Truck truck, int layerLevel, int spaceWidth, int index) {
-        int parcelBottomWidth = parcel.getBottomWidth();
+        int parcelWidth = parcel.getBottomWidth();
+        int parcelHeight = parcel.getHeight();
 
-        return !(spaceWidth < parcelBottomWidth
-                || !truckSpaceValidator.isBottomLayerValid(truck, parcelBottomWidth, layerLevel - 1, index));
+        int freeHeight = truck.getHeight() - layerLevel + 1;
+
+        return !(spaceWidth < parcelWidth
+                || freeHeight < parcelHeight
+                || !truckSpaceValidator.isBottomLayerValid(truck, parcelWidth, layerLevel - 1, index));
     }
 
     /**

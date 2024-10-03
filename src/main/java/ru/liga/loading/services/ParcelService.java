@@ -11,6 +11,7 @@ import ru.liga.loading.view.ParcelView;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -22,6 +23,25 @@ public class ParcelService {
     private final ParcelRepository parcelRepository;
     private final ParcelView parcelView;
     private final ParcelValidator parcelValidator;
+
+    /**
+     * Чтение посылок из файла.
+     * @param filePath путь к файлу.
+     * @return список посылок.
+     * @throws IOException если при чтении из файла произошла ошибка ввода-вывода или была прочитана
+     * некорректная или неотображаемая последовательность байтов.
+     */
+    public List<Parcel> readParcelsFromFile(String filePath) throws IOException {
+        return parcelReader.readParcelsFromFile(filePath);
+    }
+
+    public List<Parcel> getParcelsByNames(String[] names) throws FileNotFoundException {
+        List<Parcel> parcels = new ArrayList<>();
+        for (String name : names) {
+            parcels.add(getByName(name));
+        }
+        return parcels;
+    }
 
     /**
      * Метод сохранения новой посылки.
@@ -47,12 +67,13 @@ public class ParcelService {
     public void update(String name, String newName, char newSymbol) throws IOException {
         Parcel parcel = parcelReader.readParcel(newName, newSymbol);
 
-        boolean isNewNamePresent = !newName.isBlank();
-        boolean isNewSymbolPresent = newSymbol != ' ';
+        if (!newName.isBlank())
+            parcel.setName(newName);
 
-        if (isNewNamePresent) parcel.setName(newName);
-        if (isNewSymbolPresent) parcel.setSymbol(newSymbol);
-
+        if (newSymbol != ' ') {
+            parcel.setSymbol(newSymbol);
+        }
+        parcelValidator.validateBox(parcel);
         parcelRepository.update(name, parcel);
     }
 

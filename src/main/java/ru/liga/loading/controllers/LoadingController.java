@@ -8,7 +8,6 @@ import org.springframework.shell.standard.ShellOption;
 import ru.liga.loading.enums.LoadingMode;
 import ru.liga.loading.models.Parcel;
 import ru.liga.loading.models.Truck;
-import ru.liga.loading.readers.ParcelReader;
 import ru.liga.loading.readers.TruckJsonReader;
 import ru.liga.loading.services.LoadingService;
 import ru.liga.loading.services.LoadingServiceFactory;
@@ -28,7 +27,6 @@ import java.util.List;
 public class LoadingController {
 
     private final TruckJsonReader truckJsonReader;
-    private final ParcelReader parcelReader;
     private final LoadingServiceFactory loadingServiceFactory;
     private final TruckService truckService;
     private final ParcelService parcelService;
@@ -37,25 +35,37 @@ public class LoadingController {
     /** Эндпоинт для погрузки посылок в грузовики */
     @ShellMethod(key = "load")
     public void loadParcels(
-            String file,
             String mode,
             @ShellOption(defaultValue = "-1") int trucks,
             @ShellOption(defaultValue = "6") int height,
-            @ShellOption(defaultValue = "6") int width
-    ) {
+            @ShellOption(defaultValue = "6") int width,
+            @ShellOption(defaultValue = "") String file,
+            @ShellOption(defaultValue = "") String[] parcels
+            ) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
         log.debug("Method '%s' has started".formatted(methodName));
-        try {
-            List<Parcel> parcels = parcelReader.readParcelsFromFile(file);
-            LoadingMode loadingMode = LoadingMode.valueOf(mode.toUpperCase());
-            LoadingService loadingService = loadingServiceFactory.createLoadingServiceFromMode(loadingMode);
 
-            List<Truck> loadedTrucks = loadTrucks(loadingService, parcels, trucks, width, height);
-            truckService.displayTrucks(loadedTrucks);
+        if (!file.isBlank() && parcels.length > 0 || file.isBlank() && parcels.length == 0)
+            throw new UnsupportedOperationException("You must enter no more and no less than " +
+                    "1 parcels source (file/names)");
+
+        List<Parcel> parcelList;
+        try {
+            parcelList = file.isBlank() ? parcelService.getParcelsByNames(parcels)
+                    : parcelService.readParcelsFromFile(file);
+
         } catch (IOException e) {
             System.out.println("No such file");
             log.error("File not found");
+            return;
         }
+
+        LoadingMode loadingMode = LoadingMode.valueOf(mode.toUpperCase());
+        LoadingService loadingService = loadingServiceFactory.createLoadingServiceFromMode(loadingMode);
+
+        List<Truck> loadedTrucks = loadTrucks(loadingService, parcelList, trucks, width, height);
+        truckService.displayTrucks(loadedTrucks);
+
         log.debug("Method '%s' has finished".formatted(methodName));
     }
 
