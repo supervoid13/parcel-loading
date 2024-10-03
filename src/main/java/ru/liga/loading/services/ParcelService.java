@@ -104,6 +104,6 @@ public class ParcelService {
     }
 
     private Parcel getByName(String name) throws FileNotFoundException {
-        return parcelRepository.findByName(name).orElseThrow(() -> new NoSuchElementException("No such parcel"));
+        return parcelRepository.findByName(name).orElseThrow(() -> new NoSuchElementException("No such parcel " + name));
     }
 }

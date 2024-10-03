@@ -38,7 +38,7 @@ public class TruckView {
             Map<Character, Integer> countedParcels = truckUtils.countParcels(truck);
 
             for (Map.Entry<Character, Integer> entry : countedParcels.entrySet()) {
-                System.out.println("Amount of parcels with rate of " + entry.getKey() + " - " + entry.getValue());
+                System.out.println("Amount of parcels with symbol " + entry.getKey() + " - " + entry.getValue());
             }
             System.out.println("Truck's body");
             truck.printBody();

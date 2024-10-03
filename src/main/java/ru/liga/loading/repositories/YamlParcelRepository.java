@@ -80,7 +80,7 @@ public class YamlParcelRepository implements ParcelRepository {
         Parcel toUpdate = parcels.stream()
                 .filter(p -> p.getName().equals(name))
                 .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("No such parcel"));
+                .orElseThrow(() -> new NoSuchElementException("No such parcel " + name));
 
         toUpdate.setName(parcel.getName());
         toUpdate.setSymbol(parcel.getSymbol());
@@ -95,7 +95,7 @@ public class YamlParcelRepository implements ParcelRepository {
         Parcel parcel = parcels.stream()
                 .filter(p -> p.getName().equals(name))
                 .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("No such parcel"));
+                .orElseThrow(() -> new NoSuchElementException("No such parcel " + name));
 
         parcels.remove(parcel);
         pushUpdates(parcels);

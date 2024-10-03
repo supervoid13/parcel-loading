@@ -66,12 +66,13 @@ public class TruckJsonValidator {
         try {
             for (int h = box.length - 1; h >= 0; h--) {
                 for (int w = 0; w < box[h].length; w++) {
-                    if (box[h][w] != body[height - h][w + width])
+                    if (box[h][w] != body[height][w + width])
                         return false;
 
-                    String indexStr = (height - h) + "" + (w + width);
+                    String indexStr = (height) + "" + (w + width);
                     validIndexes.add(indexStr);
                 }
+                height--;
             }
         } catch (IndexOutOfBoundsException e) {
             log.error("Invalid json file with trucks");
