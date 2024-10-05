@@ -9,7 +9,6 @@ import ru.liga.loading.repositories.ParcelRepository;
 import ru.liga.loading.validators.ParcelValidator;
 import ru.liga.loading.view.ParcelView;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,14 +27,17 @@ public class ParcelService {
      * Чтение посылок из файла.
      * @param filePath путь к файлу.
      * @return список посылок.
-     * @throws IOException если при чтении из файла произошла ошибка ввода-вывода или была прочитана
-     * некорректная или неотображаемая последовательность байтов.
      */
-    public List<Parcel> readParcelsFromFile(String filePath) throws IOException {
+    public List<Parcel> readParcelsFromFile(String filePath) {
         return parcelReader.readParcelsFromFile(filePath);
     }
 
-    public List<Parcel> getParcelsByNames(String[] names) throws FileNotFoundException {
+    /**
+     * Метод получения посылок по их именам.
+     * @param names имена посылок.
+     * @return список посылок.
+     */
+    public List<Parcel> getParcelsByNames(String[] names) {
         List<Parcel> parcels = new ArrayList<>();
         for (String name : names) {
             parcels.add(getByName(name));
@@ -44,14 +46,29 @@ public class ParcelService {
     }
 
     /**
+     * Метод получения всех посылок в виде удобно-читаемой строки.
+     * @return строку, отображающую список посылок.
+     */
+    public String getPrettyOutputForAllParcels() {
+        return parcelView.convertParcelsToPrettyOutput(getAllParcels());
+    }
+
+    /**
+     * Метод получения посылки в удобно-читаемом виде.
+     * @param name имя посылки.
+     * @return строку, отображающую посылку.
+     */
+    public String getPrettyOutputForParcelByName(String name) {
+        return getByName(name).convertToPrettyOutput();
+    }
+
+    /**
      * Метод сохранения новой посылки.
      * @param name имя посылки.
      * @param symbol символ формы.
      * @throws ParcelAlreadyExistException если посылка с таким именем уже существует.
-     * @throws IOException если произошла ошибка чтения формы посылки.
-     * @throws FileNotFoundException если файл с посылки не найден.
      */
-    public void save(String name, char symbol) throws IOException {
+    public void save(String name, char symbol) {
         Parcel parcel = parcelReader.readParcel(name, symbol);
         parcelValidator.validateBox(parcel);
         parcelRepository.save(parcel);
@@ -60,11 +77,9 @@ public class ParcelService {
     /**
      * Метод изменения посылки по её имени.
      * @param newName имя посылки.
-     * @throws FileNotFoundException если файл с посылки не найден.
-     * @throws IOException если произошла ошибка работы с файлом с посылками.
      * @throws NoSuchElementException если посылка с таким именем не найдена.
      */
-    public void update(String name, String newName, char newSymbol) throws IOException {
+    public void update(String name, String newName, char newSymbol) {
         Parcel parcel = parcelReader.readParcel(newName, newSymbol);
 
         if (!newName.isBlank())
@@ -81,29 +96,11 @@ public class ParcelService {
         parcelRepository.deleteByName(name);
     }
 
-    /**
-     * Метод отображения списка существующих посылок.
-     * @throws FileNotFoundException если файл с посылки не найден.
-     */
-    public void displayParcels() throws FileNotFoundException {
-        parcelView.displayParcels(getAllParcels());
-    }
-
-    /**
-     * Метод отображения посылки по имени.
-     * @param name имя посылки.
-     * @throws FileNotFoundException если файл с посылки не найден.
-     * @throws NoSuchElementException если посылка с таким именем не найдена.
-     */
-    public void displayParcel(String name) throws FileNotFoundException {
-        parcelView.displayParcel(getByName(name));
-    }
-
-    private List<Parcel> getAllParcels() throws FileNotFoundException {
+    private List<Parcel> getAllParcels() {
         return parcelRepository.findAll();
     }
 
-    private Parcel getByName(String name) throws FileNotFoundException {
+    private Parcel getByName(String name) {
         return parcelRepository.findByName(name).orElseThrow(() -> new NoSuchElementException("No such parcel " + name));
     }
 }

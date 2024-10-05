@@ -26,18 +26,17 @@ public class EffectiveLoadingService implements LoadingService {
             int truckWidth,
             int truckHeight
     ) {
-        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        log.debug("Method '%s' has started".formatted(methodName));
+        log.debug("Method '{}' has started", "loadTrucksWithParcelsWithInfiniteTrucksAmount");
 
         List<Truck> trucks = loadTrucksWithParcels(parcels, truckWidth, truckHeight);
 
-        log.debug("Method '%s' has finished".formatted(methodName));
+        log.debug("Method '{}' has finished", "loadTrucksWithParcelsWithInfiniteTrucksAmount");
         return trucks;
     }
 
     private List<Truck> loadTrucksWithParcels(List<Parcel> parcels, int truckWidth, int truckHeight) {
-        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        log.debug("Method '%s' has started".formatted(methodName));
+        log.debug("Method '{}' has started", "loadTrucksWithParcels");
+
 
         parcelLoader.checkParcelsFitTruckBodies(parcels, truckHeight, truckWidth);
 
@@ -45,7 +44,7 @@ public class EffectiveLoadingService implements LoadingService {
         List<Parcel> sortedParcels = parcelUtils.prepareParcelsByBottomWidthThenSquare(parcels);
         List<Truck> trucks = load(sortedParcels, truckWidth, truckHeight);
 
-        log.debug("Method '%s' has finished".formatted(methodName));
+        log.debug("Method '{}' has finished", "loadTrucksWithParcels");
         return trucks;
     }
 
@@ -56,7 +55,7 @@ public class EffectiveLoadingService implements LoadingService {
         trucks.add(truck);
 
         int truckIndex = 0, parcelIndex = 0, layerLevel = 1;
-        int[] widthAndIndex = truck.getEmptySpaceWidthAndIndexOnLayer(layerLevel);
+        int[] widthAndIndex = truck.calcEmptySpaceWidthAndIndexOnLayer(layerLevel);
 
         while (!parcels.isEmpty()) {
             Parcel parcelGuess = parcels.get(parcelIndex);
@@ -80,7 +79,7 @@ public class EffectiveLoadingService implements LoadingService {
                 while (!truck.isLayerAvailable(layerLevel) && layerLevel != truck.getHeight())
                     layerLevel++;
 
-                widthAndIndex = truck.getEmptySpaceWidthAndIndexOnLayer(layerLevel);
+                widthAndIndex = truck.calcEmptySpaceWidthAndIndexOnLayer(layerLevel);
 
             } else if (parcelIndex == parcels.size() - 1) {
                 if (layerLevel == truck.getHeight()) {
@@ -99,7 +98,7 @@ public class EffectiveLoadingService implements LoadingService {
                     parcelIndex = 0;
                     layerLevel++;
                 }
-                widthAndIndex = truck.getEmptySpaceWidthAndIndexOnLayer(layerLevel);
+                widthAndIndex = truck.calcEmptySpaceWidthAndIndexOnLayer(layerLevel);
             } else {
                 parcelIndex++;
             }

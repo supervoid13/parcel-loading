@@ -6,7 +6,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.liga.loading.exceptions.TruckValidationException;
 import ru.liga.loading.models.Truck;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,7 +30,7 @@ public class TruckJsonReaderTest {
     }
 
     @Test
-    public void readTrucksFromJson_givenValidJson_shouldReturnCorrectTruckList() throws IOException {
+    public void readTrucksFromJson_givenValidJson_shouldReturnCorrectTruckList() {
         String filePath = getClass().getClassLoader().getResource("valid_trucks.json").getPath();
         List<Truck> actualTrucks = truckJsonReader.readTrucksFromJson(filePath);
         List<Truck> expectedTrucks = getTrucks();

@@ -6,6 +6,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.liga.loading.exceptions.TruckValidationException;
 import ru.liga.loading.models.Truck;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -31,8 +33,9 @@ public class TruckJsonValidatorTest {
                 {'8', '8', '8', '8', '2', '2'},
                 {'5', '5', '5', '5', '5', '1'},
         };
+        List<Truck> trucks = List.of(new Truck(body));
 
-        assertThatThrownBy(() -> truckJsonValidator.validate(body))
+        assertThatThrownBy(() -> truckJsonValidator.validateTruckList(trucks))
                 .isInstanceOf(TruckValidationException.class);
     }
 
@@ -48,7 +51,8 @@ public class TruckJsonValidatorTest {
                 {'8', '8', '8', '8', '2', '2'},
                 {'5', '5', '5', '5', '5', '1'},
         };
+        List<Truck> trucks = List.of(new Truck(body));
 
-        assertThatCode(() -> truckJsonValidator.validate(body)).doesNotThrowAnyException();
+        assertThatCode(() -> truckJsonValidator.validateTruckList(trucks)).doesNotThrowAnyException();
     }
 }

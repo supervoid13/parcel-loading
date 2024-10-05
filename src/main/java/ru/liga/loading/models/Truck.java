@@ -56,7 +56,7 @@ public class Truck {
      *
      * @return площадь кузова, занятая посылками.
      */
-    public int getOccupiedSpaceSquare() {
+    public int calculateOccupiedSpaceSquare() {
         int square = 0;
 
         for (char[] layer : body) {
@@ -73,8 +73,8 @@ public class Truck {
      *
      * @return площадь кузова, свободная от посылок.
      */
-    public int getEmptySpaceSquare() {
-        return width * height - getOccupiedSpaceSquare();
+    public int calculateEmptySpaceSquare() {
+        return width * height - calculateOccupiedSpaceSquare();
     }
 
     public char[] getLayer(int layerLevel) {
@@ -89,7 +89,7 @@ public class Truck {
      * @param layerLevel уровень высоты в кузове. Начинается с 1.
      * @return массив двух элементов: ширина и индекс начала.
      */
-    public int[] getEmptySpaceWidthAndIndexOnLayer(int layerLevel) {
+    public int[] calcEmptySpaceWidthAndIndexOnLayer(int layerLevel) {
         char[] layer = getLayer(layerLevel);
 
         int maxLength = 0, maxIndex = -1, currentLength = 0, currentIndex = -1;
@@ -164,6 +164,14 @@ public class Truck {
      * Метод печати кузова грузовика {@link Truck#body} в удобно-читаемом виде
      */
     public void printBody() {
+        System.out.println(convertToPrettyBody());
+    }
+
+    /**
+     * Метод конвертации кузова грузовика в строку.
+     * @return строку, представляющую кузов.
+     */
+    public String convertToPrettyBody() {
         StringBuilder sb = new StringBuilder();
 
         for (char[] layer : body) {
@@ -175,8 +183,9 @@ public class Truck {
         }
         sb.append("+".repeat(width)).append("++");
 
-        System.out.println(sb);
+        return sb.toString();
     }
+
 
     @Override
     public boolean equals(Object o) {

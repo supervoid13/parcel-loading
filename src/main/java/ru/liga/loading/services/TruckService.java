@@ -13,20 +13,12 @@ public class TruckService {
 
     private final TruckView truckView;
 
-
     /**
-     * Метод отображения кузовов грузовиков.
-     * @param trucks список грузовиков.
+     * Метод конвертации грузовиков с посылками в строку.
+     * @param trucks грузовики.
+     * @return удобно-читаемую строку.
      */
-    public void displayTrucks(List<Truck> trucks) {
-        truckView.displayTrucks(trucks);
-    }
-
-    /**
-     * Метод отображения кузовов грузовиков, посылок и их количества.
-     * @param trucks список грузовиков.
-     */
-    public void displayParcelAmountAndTruckBodies(List<Truck> trucks) {
-        truckView.displayParcelAmountAndTruckBodies(trucks);
+    public String getPrettyOutputForTrucks(List<Truck> trucks) {
+        return truckView.convertTrucksToPrettyOutput(trucks);
     }
 }

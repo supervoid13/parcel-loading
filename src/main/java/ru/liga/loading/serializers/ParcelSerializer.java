@@ -7,7 +7,6 @@ import ru.liga.loading.exceptions.ParcelValidationException;
 import ru.liga.loading.models.Parcel;
 import ru.liga.loading.validators.ParcelValidator;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,9 +23,8 @@ public class ParcelSerializer {
      * @param parcelsStr строка с посылками.
      * @return список посылок.
      * @throws ParcelValidationException если снимки посылок в строке невалидны.
-     * @throws FileNotFoundException если не найден файл с посылками.
      */
-    public List<Parcel> deserializeList(String parcelsStr) throws FileNotFoundException {
+    public List<Parcel> deserializeList(String parcelsStr) {
 
         String[] parcelsStrArray = parcelsStr.split("\\n{2,}");
 

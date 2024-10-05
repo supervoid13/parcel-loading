@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import ru.liga.loading.models.Parcel;
 import ru.liga.loading.repositories.ParcelRepository;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -49,14 +48,9 @@ public class ParcelUtils {
     }
 
     public int calculateSquareFromSymbol(char symbol) {
-        Parcel parcel;
-        try {
-            parcel = parcelRepository.findBySymbol(symbol).orElseThrow(
-                    () -> new NoSuchElementException("No such parcel")
-            );
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException("No data about parcels");
-        }
+        Parcel parcel = parcelRepository.findBySymbol(symbol).orElseThrow(
+                () -> new NoSuchElementException("No such parcel")
+        );
 
         int result = 0;
         char parcelSymbol = parcel.getSymbol();

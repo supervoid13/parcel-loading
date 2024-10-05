@@ -8,8 +8,8 @@ import ru.liga.loading.models.Parcel;
 import ru.liga.loading.models.Truck;
 import ru.liga.loading.repositories.ParcelRepository;
 
-import java.io.FileNotFoundException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -21,11 +21,17 @@ public class TruckJsonValidator {
     private final ParcelRepository parcelRepository;
 
     /**
-     * Метод валидации кузова грузовика.
-     * @param body кузов грузовика.
-     * @throws FileNotFoundException если не найден файл с посылками.
+     * Метод валидации кузовов списка грузовиков.
+     * @param trucks список грузовиков.
      */
-    public void validate(char[][] body) throws FileNotFoundException {
+    public void validateTruckList(List<Truck> trucks) {
+        for (Truck truck : trucks) {
+            validateTruck(truck);
+        }
+    }
+
+    private void validateTruck(Truck truck) {
+        char[][] body = truck.getBody();
         Set<String> validIndexes = new HashSet<>();
         int height = body.length;
 
@@ -51,7 +57,7 @@ public class TruckJsonValidator {
             int height,
             int width,
             Set<String> validIndexes
-    ) throws FileNotFoundException {
+    ) {
         Optional<Parcel> bySymbolOpt = parcelRepository.findBySymbol(parcelChar);
 
         if (bySymbolOpt.isEmpty())

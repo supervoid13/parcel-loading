@@ -21,8 +21,7 @@ public class UniformLoadingService implements LoadingService {
 
     @Override
     public List<Truck> loadTrucksWithParcelsWithGivenTrucks(List<Parcel> parcels, List<Truck> trucks) {
-        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        log.debug("Method '%s' has started".formatted(methodName));
+        log.debug("Method '{}' has started", "loadTrucksWithParcelsWithGivenTrucks");
 
         if (!isLoadingPossible(trucks, parcels)) {
             log.error("Not enough trucks");
@@ -30,13 +29,13 @@ public class UniformLoadingService implements LoadingService {
         }
         loadTrucksWithParcels(parcels, trucks);
 
-        log.debug("Method '%s' has finished".formatted(methodName));
+        log.debug("Method '{}' has finished", "loadTrucksWithParcelsWithGivenTrucks");
+
         return trucks;
     }
 
     private void loadTrucksWithParcels(List<Parcel> parcels, List<Truck> trucks) {
-        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        log.debug("Method '%s' has started".formatted(methodName));
+        log.debug("Method '{}' has started", "loadTrucksWithParcels");
 
         Truck truck = trucks.get(0);
         int truckHeight = truck.getHeight(), truckWidth = truck.getWidth();
@@ -50,7 +49,7 @@ public class UniformLoadingService implements LoadingService {
         double avgParcelsSquare = calculateAverageSquare(sortedParcels, trucks.size());
         load(sortedParcels, trucks, avgParcelsSquare);
 
-        log.debug("Method '%s' has finished".formatted(methodName));
+        log.debug("Method '{}' has finished", "loadTrucksWithParcels");
     }
 
     private void load(List<Parcel> parcels, List<Truck> trucks, double avgParcelsSquare) {
@@ -68,7 +67,7 @@ public class UniformLoadingService implements LoadingService {
                 continue;
             }
             while (true) {
-                int[] widthAndIndex = truck.getEmptySpaceWidthAndIndexOnLayer(layerLevel);
+                int[] widthAndIndex = truck.calcEmptySpaceWidthAndIndexOnLayer(layerLevel);
                 int spaceWidth = widthAndIndex[0], index = widthAndIndex[1];
 
                 boolean possibleToLoad = parcelLoader.possibleToLoad(parcel, truck,
@@ -88,7 +87,7 @@ public class UniformLoadingService implements LoadingService {
     private Parcel findMostSuitableParcel(List<Parcel> parcels, Truck truck, double avgSquare) {
         Parcel mostSuitableParcel = null;
 
-        int occupiedSpace = truck.getOccupiedSpaceSquare();
+        int occupiedSpace = truck.calculateOccupiedSpaceSquare();
         double diff = Integer.MAX_VALUE;
 
         for (Parcel parcel : parcels) {
@@ -107,7 +106,7 @@ public class UniformLoadingService implements LoadingService {
     }
 
     private boolean needToLoadMore(Parcel parcel, Truck truck, double avgParcelsSquare) {
-        int occupiedSpace = truck.getOccupiedSpaceSquare();
+        int occupiedSpace = truck.calculateOccupiedSpaceSquare();
         double diffBeforeLoad = Math.abs(avgParcelsSquare - occupiedSpace);
 
         int occupiedSpaceIfLoad = occupiedSpace + parcel.getSquare();

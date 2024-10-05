@@ -1,37 +1,24 @@
 package ru.liga.loading.view;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.liga.loading.models.Parcel;
 
 import java.util.List;
 
+@Slf4j
 @Component
 public class ParcelView {
 
-    /**
-     * Метод отображения списка посылок в консоль.
-     * @param parcels список посылок.
-     */
-    public void displayParcels(List<Parcel> parcels) {
-        for (Parcel parcel : parcels) {
-            displayParcel(parcel);
-        }
-    }
 
-    /**
-     * Метод отображения определённой посылки в консоль.
-     * @param parcel посылка.
-     */
-    public void displayParcel(Parcel parcel) {
+    public String convertParcelsToPrettyOutput(List<Parcel> parcels) {
+        log.trace("Converting parcels to pretty output");
+
         StringBuilder sb = new StringBuilder();
-        sb.append("Form:\n");
 
-        for (char[] box : parcel.getBox()) {
-            sb.append(box).append("\n");
+        for (Parcel parcel : parcels) {
+            sb.append(parcel.convertToPrettyOutput()).append("\n");
         }
-
-        System.out.println("Name: " + parcel.getName());
-        System.out.println("Symbol: " + parcel.getSymbol());
-        System.out.println(sb);
+        return sb.toString();
     }
 }

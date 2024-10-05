@@ -24,7 +24,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @ShellComponent
-public class LoadingController {
+public class LoadingShellController {
 
     private final TruckJsonReader truckJsonReader;
     private final LoadingServiceFactory loadingServiceFactory;
@@ -34,7 +34,7 @@ public class LoadingController {
 
     /** Эндпоинт для погрузки посылок в грузовики */
     @ShellMethod(key = "load")
-    public void loadParcels(
+    public String loadParcels(
             String mode,
             @ShellOption(defaultValue = "-1") int trucks,
             @ShellOption(defaultValue = "6") int height,
@@ -42,43 +42,28 @@ public class LoadingController {
             @ShellOption(defaultValue = "") String file,
             @ShellOption(defaultValue = "") String[] parcels
             ) {
-        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        log.debug("Method '%s' has started".formatted(methodName));
+        log.debug("Method '{}' has started", "loadParcels");
 
         if (!file.isBlank() && parcels.length > 0 || file.isBlank() && parcels.length == 0)
             throw new UnsupportedOperationException("You must enter no more and no less than " +
                     "1 parcels source (file/names)");
 
-        List<Parcel> parcelList;
-        try {
-            parcelList = file.isBlank() ? parcelService.getParcelsByNames(parcels)
-                    : parcelService.readParcelsFromFile(file);
-
-        } catch (IOException e) {
-            System.out.println("No such file");
-            log.error("File not found");
-            return;
-        }
+        List<Parcel> parcelList = file.isBlank() ? parcelService.getParcelsByNames(parcels)
+                : parcelService.readParcelsFromFile(file);
 
         LoadingMode loadingMode = LoadingMode.valueOf(mode.toUpperCase());
         LoadingService loadingService = loadingServiceFactory.createLoadingServiceFromMode(loadingMode);
 
         List<Truck> loadedTrucks = loadTrucks(loadingService, parcelList, trucks, width, height);
-        truckService.displayTrucks(loadedTrucks);
 
-        log.debug("Method '%s' has finished".formatted(methodName));
+        log.debug("Method '{}' has finished", "loadParcels");
+        return truckService.getPrettyOutputForTrucks(loadedTrucks);
     }
 
     /** Эндпоинт для подсчёта посылок в грузовиках из json файла */
     @ShellMethod(key = "specify")
-    public void specifyParcels(String file) {
-        try {
-            List<Truck> trucks = truckJsonReader.readTrucksFromJson(file);
-            truckService.displayParcelAmountAndTruckBodies(trucks);
-        } catch (IOException e) {
-            System.out.println("No such file");
-            log.error("File not found");
-        }
+    public String specifyParcels(String file) {
+            return truckService.getPrettyOutputForTrucks(truckJsonReader.readTrucksFromJson(file));
     }
 
     /**
@@ -87,11 +72,9 @@ public class LoadingController {
      * @throws FileNotFoundException если файл с посылками не найден.
      */
     @ShellMethod(key = "parcels")
-    public void displayParcels(@ShellOption(defaultValue = "") String name) throws FileNotFoundException {
-        if (name.isBlank())
-            parcelService.displayParcels();
-        else
-            parcelService.displayParcel(name);
+    public String displayParcels(@ShellOption(defaultValue = "") String name) throws FileNotFoundException {
+        return name.isBlank() ? parcelService.getPrettyOutputForAllParcels()
+                : parcelService.getPrettyOutputForParcelByName(name);
     }
 
     /**

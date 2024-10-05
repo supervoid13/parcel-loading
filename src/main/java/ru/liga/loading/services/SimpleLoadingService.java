@@ -25,12 +25,12 @@ public class SimpleLoadingService implements LoadingService {
     @Override
     public List<Truck> loadTrucksWithParcelsWithInfiniteTrucksAmount(List<Parcel> parcels, int truckWidth, int truckHeight) {
         String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        log.debug("Method '%s' has started".formatted(methodName));
+        log.debug("Method '{}' has started", "loadTrucksWithParcelsWithInfiniteTrucksAmount");
 
         List<Parcel> sortedParcels = parcelUtils.prepareParcelsBySquare(parcels);
         List<Truck> trucks = load(sortedParcels, truckWidth, truckHeight);
 
-        log.debug("Method '%s' has finished".formatted(methodName));
+        log.debug("Method '{}' has finished", "loadTrucksWithParcelsWithInfiniteTrucksAmount");
         return trucks;
     }
 

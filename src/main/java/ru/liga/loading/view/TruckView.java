@@ -16,32 +16,22 @@ public class TruckView {
 
     private final TruckUtils truckUtils;
 
-    /**
-     * Метод отображения кузовов грузовиков.
-     * @param trucks список грузовиков.
-     */
-    public void displayTrucks(List<Truck> trucks) {
-        log.trace("Displaying truck bodies on screen");
-        for (Truck truck : trucks) {
-            truck.printBody();
-            System.out.println();
-        }
-    }
 
-    /**
-     * Метод отображения кузовов грузовиков, посылок и их количества.
-     * @param trucks список грузовиков.
-     */
-    public void displayParcelAmountAndTruckBodies(List<Truck> trucks) {
-        log.trace("Displaying amount of parcels by rate and truck bodies on screen");
+    public String convertTrucksToPrettyOutput(List<Truck> trucks) {
+        log.trace("Converting trucks to pretty output of amount of parcels by rate and truck bodies");
+
+        StringBuilder sb = new StringBuilder();
+
         for (Truck truck : trucks) {
             Map<Character, Integer> countedParcels = truckUtils.countParcels(truck);
 
             for (Map.Entry<Character, Integer> entry : countedParcels.entrySet()) {
-                System.out.println("Amount of parcels with symbol " + entry.getKey() + " - " + entry.getValue());
+                sb.append("Amount of parcels with symbol ").append(entry.getKey()).append(" - ").append(entry.getValue()).append("\n");
             }
-            System.out.println("Truck's body");
-            truck.printBody();
+            sb.append("Truck's body\n");
+            sb.append(truck.convertToPrettyBody()).append("\n");
         }
+
+        return sb.toString();
     }
 }

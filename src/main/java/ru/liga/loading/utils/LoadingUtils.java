@@ -37,7 +37,7 @@ public class LoadingUtils {
             List<Truck> trucks = Stream.generate(() -> new Truck(width, height))
                     .limit(trucksAmount)
                     .toList();
-            log.info("Amount of trucks - %d".formatted(trucksAmount));
+            log.info("Amount of trucks - {}", trucksAmount);
             return trucks;
         } catch (IllegalArgumentException e) {
             log.error("Invalid amount of trucks");

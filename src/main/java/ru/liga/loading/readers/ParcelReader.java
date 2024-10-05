@@ -24,21 +24,24 @@ public class ParcelReader {
      * Метод чтения посылок из файла.
      * @param filePath путь к файлу.
      * @return список посылок
-     * @throws IOException если при чтении из файла произошла ошибка ввода-вывода или была прочитана
-     * некорректная или неотображаемая последовательность байтов
      */
-    public List<Parcel> readParcelsFromFile(String filePath) throws IOException {
-        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        log.debug("Method '%s' has started".formatted(methodName));
+    public List<Parcel> readParcelsFromFile(String filePath) {
+        log.debug("Method '{}' has started", "readParcelsFromFile");
 
-        String text = Files.readString(Path.of(filePath));
-        if (text.isBlank()) {
-            log.warn("File is empty");
+        List<Parcel> parcels = null;
+        try {
+            String text = Files.readString(Path.of(filePath));
+
+            if (text.isBlank()) {
+                return Collections.emptyList();
+            }
+            parcels = parcelSerializer.deserializeList(text);
+        } catch (IOException e) {
+            log.error("Problem with reading parcels from file");
             return Collections.emptyList();
         }
-        List<Parcel> parcels = parcelSerializer.deserializeList(text);
 
-        log.debug("Method '%s' has finished".formatted(methodName));
+        log.debug("Method '{}' has finished", "readParcelsFromFile");
         return parcels;
     }
 

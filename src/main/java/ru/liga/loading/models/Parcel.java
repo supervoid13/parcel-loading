@@ -74,6 +74,23 @@ public class Parcel {
         return temp;
     }
 
+    /**
+     * Метод конвертации посылки в удобно-читаемую форму.
+     * @return строку, представляющую посылку.
+     */
+    public String convertToPrettyOutput() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Name: ").append(name).append("\n");
+        sb.append("Symbol: ").append(symbol).append("\n");
+
+        sb.append("Form:\n");
+
+        for (char[] box : box) {
+            sb.append(box).append("\n");
+        }
+        return sb.toString();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

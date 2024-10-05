@@ -31,7 +31,7 @@ public interface LoadingService {
      */
     default boolean isLoadingPossible(List<Truck> trucks, List<Parcel> parcels) {
         int trucksBodyTotalSquare = trucks.stream()
-                .map(Truck::getEmptySpaceSquare)
+                .map(Truck::calculateEmptySpaceSquare)
                 .mapToInt(x -> x)
                 .sum();
 

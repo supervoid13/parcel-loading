@@ -9,6 +9,7 @@ import ru.liga.loading.serializers.TruckSerializer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -22,17 +23,20 @@ public class TruckJsonReader {
      * Метод чтения грузовиков из json файла.
      * @param filePath путь к json файлу.
      * @return список грузовиков.
-     * @throws IOException если при чтении из файла произошла ошибка ввода-вывода или была прочитана
-     * некорректная или неотображаемая последовательность байтов
      */
-    public List<Truck> readTrucksFromJson(String filePath) throws IOException {
-        String methodName = Thread.currentThread().getStackTrace()[1].getMethodName();
-        log.debug("Method '%s' has started".formatted(methodName));
+    public List<Truck> readTrucksFromJson(String filePath) {
+        log.debug("Method '{}' has started", "readTrucksFromJson");
 
-        String json = Files.readString(Path.of(filePath));
-        List<Truck> trucks = truckSerializer.deserialize(json);
+        List<Truck> trucks;
+        try {
+            String json = Files.readString(Path.of(filePath));
+            trucks = truckSerializer.deserialize(json);
+        } catch (IOException e) {
+            log.error("Problem with reading trucks from file");
+            return Collections.emptyList();
+        }
 
-        log.debug("Method '%s' has finished".formatted(methodName));
+        log.debug("Method '{}' has finished", "readTrucksFromJson");
         return trucks;
     }
 }

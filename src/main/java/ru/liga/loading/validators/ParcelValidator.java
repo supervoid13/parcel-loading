@@ -8,7 +8,6 @@ import ru.liga.loading.exceptions.ParcelValidationException;
 import ru.liga.loading.models.Parcel;
 import ru.liga.loading.repositories.ParcelRepository;
 
-import java.io.FileNotFoundException;
 import java.util.List;
 
 @Slf4j
@@ -22,9 +21,8 @@ public class ParcelValidator {
      * Валидация посылки.
      * @param parcel строка со снимком посылки.
      * @throws ParcelValidationException если снимок посылки невалиден.
-     * @throws FileNotFoundException если не найден файл с посылками.
      */
-    public void validateExisting(Parcel parcel) throws FileNotFoundException {
+    public void validateExisting(Parcel parcel) {
         List<Parcel> existingParcels = parcelRepository.findAll();
         if (!existingParcels.contains(parcel)) {
             log.error("Parcels are not valid");

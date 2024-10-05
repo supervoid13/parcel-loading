@@ -1,9 +1,7 @@
 package ru.liga.loading.serializers;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,8 +10,7 @@ import ru.liga.loading.exceptions.TruckValidationException;
 import ru.liga.loading.models.Truck;
 import ru.liga.loading.validators.TruckJsonValidator;
 
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -29,25 +26,17 @@ public class TruckSerializer {
      * @param json строка с грузовиками
      * @return список грузовиков
      * @throws TruckValidationException если снимки кузовов грузовиков в строке невалидны
-     * @throws FileNotFoundException если файл с существующими посылками не найден.
      */
-    public List<Truck> deserialize(String json) throws FileNotFoundException {
-        JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
-        JsonArray trucksJsonArray = jsonObject.getAsJsonArray("trucks");
+    public List<Truck> deserialize(String json) {
+        JsonElement jsonElement = JsonParser.parseString(json);
 
-        List<Truck> trucks = new ArrayList<>();
+        Truck[] trucks = gson.fromJson(jsonElement, Truck[].class);
+        List<Truck> truckList = Arrays.asList(trucks);
 
         log.info("Truck validation has started");
-        for (JsonElement truckJson : trucksJsonArray) {
-            JsonArray jsonArray = truckJson.getAsJsonObject().getAsJsonArray("body");
-
-            char[][] body = gson.fromJson(jsonArray, char[][].class);
-            validator.validate(body);
-
-            trucks.add(new Truck(body));
-        }
+        validator.validateTruckList(truckList);
         log.info("Trucks are valid");
 
-        return trucks;
+        return truckList;
     }
 }

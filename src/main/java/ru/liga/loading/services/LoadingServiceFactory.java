@@ -2,16 +2,17 @@ package ru.liga.loading.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import ru.liga.loading.enums.LoadingMode;
+
+import java.util.Map;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class LoadingServiceFactory {
 
-    private final ApplicationContext context;
+    private final Map<String, LoadingService> loadingServiceMap;
 
     /**
      * Фабричный метод для получения определённого сервиса погрузки в зависимости от способа.
@@ -20,20 +21,6 @@ public class LoadingServiceFactory {
      * @throws UnsupportedOperationException если нет сервиса погрузки с заданным способом
      */
     public LoadingService createLoadingServiceFromMode(LoadingMode mode) {
-        return switch (mode) {
-            case SIMPLE -> {
-                log.info("Mode - simple loading");
-                yield context.getBean(SimpleLoadingService.class);
-            }
-            case EFFECTIVE -> {
-                log.info("Mode - effective loading");
-                yield context.getBean("effective", LoadingService.class);
-            }
-            case UNIFORM -> {
-                log.info("Mode - uniform loading");
-                yield context.getBean(UniformLoadingService.class);
-            }
-            default -> throw new UnsupportedOperationException("No such loading service");
-        };
+        return loadingServiceMap.get(mode.name().toLowerCase());
     }
 }

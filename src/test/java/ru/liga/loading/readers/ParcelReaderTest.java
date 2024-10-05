@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.liga.loading.models.Parcel;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
@@ -22,7 +21,7 @@ public class ParcelReaderTest {
     }
 
     @Test
-    public void readParcelsFromFile_givenEmptyFile_shouldReturnEmptyList() throws IOException {
+    public void readParcelsFromFile_givenEmptyFile_shouldReturnEmptyList() {
         URL filePath = getClass().getClassLoader().getResource("empty_file.txt");
         List<Parcel> parcels = parcelReader.readParcelsFromFile(filePath.getPath());
 
@@ -30,7 +29,7 @@ public class ParcelReaderTest {
     }
 
     @Test
-    public void readParcelsFromFile_givenValidFile_shouldReturnCorrectParcelList() throws IOException {
+    public void readParcelsFromFile_givenValidFile_shouldReturnCorrectParcelList() {
         URL filePath = getClass().getClassLoader().getResource("parcel_service_test_1.txt");
         List<Parcel> parcels = parcelReader.readParcelsFromFile(filePath.getPath());
 
