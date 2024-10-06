@@ -1,21 +1,24 @@
-package loading.validators;
+package ru.liga.loading.validators;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import ru.liga.loading.exceptions.TruckValidationException;
 import ru.liga.loading.models.Truck;
-import ru.liga.loading.validators.TruckJsonValidator;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@SpringBootTest(properties = "spring.shell.interactive.enabled=false")
 public class TruckJsonValidatorTest {
 
-    private TruckJsonValidator truckJsonValidator;
+    private final TruckJsonValidator truckJsonValidator;
 
-    @BeforeEach
-    public void setup() {
-        truckJsonValidator = new TruckJsonValidator();
+    @Autowired
+    public TruckJsonValidatorTest(TruckJsonValidator truckJsonValidator) {
+        this.truckJsonValidator = truckJsonValidator;
     }
 
     @Test
@@ -30,8 +33,9 @@ public class TruckJsonValidatorTest {
                 {'8', '8', '8', '8', '2', '2'},
                 {'5', '5', '5', '5', '5', '1'},
         };
+        List<Truck> trucks = List.of(new Truck(body));
 
-        assertThatThrownBy(() -> truckJsonValidator.validate(body))
+        assertThatThrownBy(() -> truckJsonValidator.validateTruckList(trucks))
                 .isInstanceOf(TruckValidationException.class);
     }
 
@@ -47,7 +51,8 @@ public class TruckJsonValidatorTest {
                 {'8', '8', '8', '8', '2', '2'},
                 {'5', '5', '5', '5', '5', '1'},
         };
+        List<Truck> trucks = List.of(new Truck(body));
 
-        assertThatCode(() -> truckJsonValidator.validate(body)).doesNotThrowAnyException();
+        assertThatCode(() -> truckJsonValidator.validateTruckList(trucks)).doesNotThrowAnyException();
     }
 }

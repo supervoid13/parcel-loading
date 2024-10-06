@@ -1,19 +1,25 @@
 package ru.liga.loading.serializers;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import ru.liga.loading.exceptions.TruckValidationException;
 import ru.liga.loading.models.Truck;
 import ru.liga.loading.validators.TruckJsonValidator;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class TruckSerializer {
 
-    private final TruckJsonValidator validator = new TruckJsonValidator();
-    private final Gson gson = new Gson();
+    private final TruckJsonValidator validator;
+    private final Gson gson;
 
     /**
      * Десериализация грузовиков из строки
@@ -22,32 +28,15 @@ public class TruckSerializer {
      * @throws TruckValidationException если снимки кузовов грузовиков в строке невалидны
      */
     public List<Truck> deserialize(String json) {
-        JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
-        JsonArray trucksJsonArray = jsonObject.getAsJsonArray("trucks");
+        JsonElement jsonElement = JsonParser.parseString(json);
 
-        List<Truck> trucks = new ArrayList<>();
+        Truck[] trucks = gson.fromJson(jsonElement, Truck[].class);
+        List<Truck> truckList = Arrays.asList(trucks);
 
         log.info("Truck validation has started");
-        for (JsonElement truckJson : trucksJsonArray) {
-            JsonArray jsonArray = truckJson.getAsJsonObject().getAsJsonArray("body");
-
-            char[][] body = gson.fromJson(jsonArray, char[][].class);
-            replaceSpaceWithNullChar(body);
-            validator.validate(body);
-
-            trucks.add(new Truck(body));
-        }
+        validator.validateTruckList(truckList);
         log.info("Trucks are valid");
 
-        return trucks;
-    }
-
-    private void replaceSpaceWithNullChar(char[][] body) {
-        for (char[] layer : body) {
-            for (int i = 0; i < layer.length; i++) {
-                if (layer[i] == ' ')
-                    layer[i] = Truck.EMPTY_SPACE_DESIGNATION;
-            }
-        }
+        return truckList;
     }
 }

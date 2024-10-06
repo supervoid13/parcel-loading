@@ -1,14 +1,22 @@
 package ru.liga.loading.utils;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import ru.liga.loading.models.Parcel;
+import ru.liga.loading.repositories.ParcelRepository;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
+@Component
+@RequiredArgsConstructor
 public class ParcelUtils {
 
     private final static int CHAR_TO_DIGIT_DIFF = 48;
+
+    private final ParcelRepository parcelRepository;
 
     /**
      * Метод сортировки списка посылок по ширине основания и площади в обратном порядке.
@@ -39,12 +47,22 @@ public class ParcelUtils {
         return parcelsCopy;
     }
 
-    /**
-     * Метод подсчёта площади посылки по её символьному идентификатору.
-     * @param parcelChar символьный идентификатор.
-     * @return площадь посылки.
-     */
-    public static int squareFromParcelChar(char parcelChar) {
-        return parcelChar - CHAR_TO_DIGIT_DIFF;
+    public int calculateSquareFromSymbol(char symbol) {
+        Parcel parcel = parcelRepository.findBySymbol(symbol).orElseThrow(
+                () -> new NoSuchElementException("No such parcel")
+        );
+
+        int result = 0;
+        char parcelSymbol = parcel.getSymbol();
+
+        char[][] box = parcel.getBox();
+
+        for (char[] layer : box) {
+            for (char sym : layer) {
+                if (sym == parcelSymbol)
+                    result++;
+            }
+        }
+        return result;
     }
 }

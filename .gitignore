@@ -5,6 +5,7 @@ target/
 
 ### IntelliJ IDEA ###
 logs
+spring-shell.log
 .idea
 .idea/modules.xml
 .idea/jarRepositories.xml

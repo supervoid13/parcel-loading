@@ -1,80 +1,99 @@
 package ru.liga.loading.validators;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import ru.liga.loading.exceptions.TruckValidationException;
+import ru.liga.loading.models.Parcel;
 import ru.liga.loading.models.Truck;
+import ru.liga.loading.repositories.ParcelRepository;
 
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class TruckJsonValidator {
 
-    private final Map<Character, Integer> parcelCharWidth = Map.of(
-            '1', 1,
-            '2', 2,
-            '3', 3,
-            '4', 4,
-            '5', 5,
-            '6', 3,
-            '7', 4,
-            '8', 4,
-            '9', 3
-    );
+    private final ParcelRepository parcelRepository;
 
     /**
-     * Валидация кузова грузовика.
-     * @param body кузов грузовика.
-     * @throws TruckValidationException если кузов грузовика невалиден.
+     * Метод валидации кузовов списка грузовиков.
+     * @param trucks список грузовиков.
      */
-    public void validate(char[][] body) {
-        Set<String> validIndexes = new HashSet<>();
+    public void validateTruckList(List<Truck> trucks) {
+        for (Truck truck : trucks) {
+            validateTruck(truck);
+        }
+    }
 
-        for (int i = Truck.HEIGHT_CAPACITY - 1; i >= 0; i--) {
-            for (int j = 0; j < Truck.WIDTH_CAPACITY; j++) {
+    private void validateTruck(Truck truck) {
+        char[][] body = truck.getBody();
+        Set<String> validIndexes = new HashSet<>();
+        int height = body.length;
+
+        for (int i = height - 1; i >= 0; i--) {
+            for (int j = 0; j < body[i].length; j++) {
                 char parcelChar = body[i][j];
 
-                if (isCharAtIndexesAlreadyChecked(i, j, validIndexes)
-                        || parcelChar == Truck.EMPTY_SPACE_DESIGNATION) {
+                if (isCharAtIndexesAlreadyChecked(i, j, validIndexes) || isCharRepresentNullValue(parcelChar)) {
                     continue;
                 }
 
-                int parcelWidth = parcelCharWidth.get(parcelChar), parcelSquare = parcelChar - '0';
-                int counter = 1, parcelLayer = Truck.HEIGHT_CAPACITY - i, parcelBodyIndexOnLayer = 1;
+                boolean isParcelInTruckValid = isParcelFormInTrucksValid(parcelChar, body, i, j, validIndexes);
 
-                while (counter < parcelSquare) {
-                    if (parcelBodyIndexOnLayer == parcelWidth) {
-                        parcelLayer++;
-                        parcelBodyIndexOnLayer = 0;
-                    }
-
-                    try {
-                        int toCheckI = Truck.HEIGHT_CAPACITY - parcelLayer, toCheckJ = parcelBodyIndexOnLayer + j;
-                        char charToCheck = body[toCheckI][toCheckJ];
-
-                        if (charToCheck != parcelChar) {
-                            log.error("Invalid json file with trucks");
-                            throw new TruckValidationException("Invalid truck json");
-                        }
-
-                        String indexesStr = (toCheckI) + "" + (toCheckJ);
-                        validIndexes.add(indexesStr);
-                        counter++;
-                        parcelBodyIndexOnLayer++;
-
-                    } catch (IndexOutOfBoundsException e) {
-                        log.error("Invalid json file with trucks");
-                        throw new TruckValidationException("Invalid truck json");
-                    }
-                }
+                if (!isParcelInTruckValid)
+                    throw new TruckValidationException("Invalid truck json");
             }
         }
     }
 
+    private boolean isParcelFormInTrucksValid(
+            char parcelChar,
+            char[][] body,
+            int height,
+            int width,
+            Set<String> validIndexes
+    ) {
+        Optional<Parcel> bySymbolOpt = parcelRepository.findBySymbol(parcelChar);
+
+        Parcel parcel = bySymbolOpt.orElseThrow(
+                () -> new TruckValidationException("Invalid truck json (no parcel with symbol " + parcelChar)
+        );
+
+        return doesMatchParcelForm(parcel, body, height, width, validIndexes);
+    }
+
+    private boolean doesMatchParcelForm(Parcel parcel, char[][] body, int height, int width, Set<String> validIndexes) {
+        char[][] box = parcel.getBox();
+
+        try {
+            for (int h = box.length - 1; h >= 0; h--) {
+                for (int w = 0; w < box[h].length; w++) {
+                    if (box[h][w] != body[height][w + width])
+                        return false;
+
+                    String indexStr = (height) + "" + (w + width);
+                    validIndexes.add(indexStr);
+                }
+                height--;
+            }
+        } catch (IndexOutOfBoundsException e) {
+            log.error("Invalid json file with trucks");
+            throw new TruckValidationException("Invalid truck json");
+        }
+        return true;
+    }
+
+    private boolean isCharRepresentNullValue(char parcelChar) {
+        return parcelChar == Truck.EMPTY_SPACE_DESIGNATION;
+    }
+
     private boolean isCharAtIndexesAlreadyChecked(int i, int j, Set<String> validIndexes) {
         String indexStr = i + "" + j;
-
         return validIndexes.contains(indexStr);
     }
 }
