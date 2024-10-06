@@ -161,13 +161,6 @@ public class Truck {
     }
 
     /**
-     * Метод печати кузова грузовика {@link Truck#body} в удобно-читаемом виде
-     */
-    public void printBody() {
-        System.out.println(convertToPrettyBody());
-    }
-
-    /**
      * Метод конвертации кузова грузовика в строку.
      * @return строку, представляющую кузов.
      */

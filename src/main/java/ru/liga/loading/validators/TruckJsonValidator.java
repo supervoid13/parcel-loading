@@ -60,10 +60,11 @@ public class TruckJsonValidator {
     ) {
         Optional<Parcel> bySymbolOpt = parcelRepository.findBySymbol(parcelChar);
 
-        if (bySymbolOpt.isEmpty())
-            throw new TruckValidationException("Invalid truck json (no parcel with symbol " + parcelChar);
+        Parcel parcel = bySymbolOpt.orElseThrow(
+                () -> new TruckValidationException("Invalid truck json (no parcel with symbol " + parcelChar)
+        );
 
-        return doesMatchParcelForm(bySymbolOpt.get(), body, height, width, validIndexes);
+        return doesMatchParcelForm(parcel, body, height, width, validIndexes);
     }
 
     private boolean doesMatchParcelForm(Parcel parcel, char[][] body, int height, int width, Set<String> validIndexes) {

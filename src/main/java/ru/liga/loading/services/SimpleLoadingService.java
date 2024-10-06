@@ -3,6 +3,7 @@ package ru.liga.loading.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.liga.loading.exceptions.NotEnoughSpaceException;
 import ru.liga.loading.models.Parcel;
 import ru.liga.loading.models.Truck;
 import ru.liga.loading.utils.ParcelLoader;
@@ -45,14 +46,13 @@ public class SimpleLoadingService implements LoadingService {
             boolean possibleToLoad = parcelLoader.possibleToLoad(parcelGuess, truck,
                     BOTTOM_LAYER_LEVEL, truck.getWidth(), LAYER_FIRST_INDEX);
 
-            if (possibleToLoad) {
-                parcelLoader.loadParcel(parcelGuess, truck, BOTTOM_LAYER_LEVEL, truck.getWidth(), LAYER_FIRST_INDEX);
-                trucks.add(truck);
-                truck = new Truck(truckWidth, truckHeight);
-            } else {
+            if (!possibleToLoad) {
                 log.error("Parcel does not fit truck body");
-                System.out.println("One of the parcels will be deleted (doesn't fit truck body)");
+                throw new NotEnoughSpaceException("Parcel doesn't fit truck body");
             }
+            parcelLoader.loadParcel(parcelGuess, truck, BOTTOM_LAYER_LEVEL, truck.getWidth(), LAYER_FIRST_INDEX);
+            trucks.add(truck);
+            truck = new Truck(truckWidth, truckHeight);
             parcels.remove(i);
         }
         return trucks;
