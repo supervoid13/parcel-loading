@@ -27,16 +27,25 @@ public class TruckJsonReader {
     public List<Truck> readTrucksFromJson(String filePath) {
         log.debug("Method '{}' has started", "readTrucksFromJson");
 
-        List<Truck> trucks;
+        String json;
         try {
-            String json = Files.readString(Path.of(filePath));
-            trucks = truckSerializer.deserialize(json);
+            json = Files.readString(Path.of(filePath));
         } catch (IOException e) {
             log.error("Problem with reading trucks from file");
             return Collections.emptyList();
         }
+        List<Truck> trucks = readTrucksFromJsonString(json);
 
         log.debug("Method '{}' has finished", "readTrucksFromJson");
         return trucks;
+    }
+
+    /**
+     * Метод для чтения грузовиков из json строки.
+     * @param json json строка.
+     * @return список грузовиков.
+     */
+    public List<Truck> readTrucksFromJsonString(String json) {
+        return truckSerializer.deserialize(json);
     }
 }

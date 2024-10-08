@@ -41,7 +41,6 @@ public class Truck {
         this.body = LoadingUtils.getArrayCopy(body);
     }
 
-
     /**
      * Получение значение поля {@link Truck#body}
      *
@@ -117,7 +116,6 @@ public class Truck {
         return new int[]{maxLength, maxIndex};
     }
 
-
     /**
      * Метод вставки посылки в кузов грузовика.
      *
@@ -174,7 +172,7 @@ public class Truck {
             }
             sb.append("+\n");
         }
-        sb.append("+".repeat(width)).append("++");
+        sb.append("+".repeat(body[0].length)).append("++");
 
         return sb.toString();
     }

@@ -33,7 +33,8 @@ public class ParcelSerializer {
         log.info("Parcel validation has started");
         for (String parcelStr : parcelsStrArray) {
             Parcel parcel = deserialize(parcelStr);
-            parcelValidator.validateExisting(parcel);
+            parcel.setSymbol(parcelStr.charAt(0));
+            parcelValidator.validate(parcel);
             parcels.add(parcel);
         }
         log.info("All parcels are valid");

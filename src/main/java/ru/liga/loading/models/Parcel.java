@@ -1,21 +1,42 @@
 package ru.liga.loading.models;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.liga.loading.utils.LoadingUtils;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Arrays;
 import java.util.Objects;
 
+@Entity
+@Table(name = "parcels", schema = "loading")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class Parcel {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
+
+    @Column(name = "symbol", nullable = false, unique = true)
     private char symbol;
+
+    @Column(name = "box", nullable = false, unique = true)
     private char[][] box;
+
+    public Parcel(String name, char symbol, char[][] box) {
+        this.name = name;
+        this.symbol = symbol;
+        this.box = box;
+    }
 
     public Parcel(char[][] box) {
         this.box = box;
@@ -33,7 +54,7 @@ public class Parcel {
      * Получение ширины нижнего слоя посылки
      * @return ширина нижнего слоя посылки
      */
-    public int getBottomWidth() {
+    public int calculateBottomWidth() {
         int height = box.length;
 
         return box[height - 1].length;
@@ -43,7 +64,7 @@ public class Parcel {
      * Получение площади посылки
      * @return общая площадь посылки
      */
-    public int getSquare() {
+    public int calculateSquare() {
         int result = 0;
 
         for (char[] charArr : box) {
@@ -56,7 +77,7 @@ public class Parcel {
      * Получение высоты.
      * @return высоту посылки.
      */
-    public int getHeight() {
+    public int calculateHeight() {
         return box.length;
     }
 
@@ -64,7 +85,7 @@ public class Parcel {
      * Получение максимальной ширины.
      * @return ширину посылки.
      */
-    public int getMaxWidth() {
+    public int calculateMaxWidth() {
         int temp = 0;
         for (char[] layer : box) {
             int width = layer.length;

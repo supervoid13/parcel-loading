@@ -1,3 +1,28 @@
+server:
+  port: 8080
+
+#logging:
+#  level:
+#    root: DEBUG
+
+spring:
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5433/league_db
+#    url: jdbc:postgresql://db:5432/${DB_NAME}
+    username: admin
+#    username: ${DB_USERNAME}
+    password: qwerty
+#    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
 bot:
   name: ParcelLoaderBot
-  key: 7867120446:AAFZgv6USoi3EHTP5EewFodVs4dQhkqQ1bA
+  key: 7867120446:AAFyQW4yz9FKw_SKAzqKjlo_mu0Q6bUQBvU
+#  key: ${TELEGRAM_BOT_TOKEN}

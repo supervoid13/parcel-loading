@@ -4,6 +4,8 @@ target/
 !**/src/test/**/target/
 
 ### IntelliJ IDEA ###
+temp
+.env
 logs
 spring-shell.log
 .idea

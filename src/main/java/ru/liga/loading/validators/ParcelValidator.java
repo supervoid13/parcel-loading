@@ -3,12 +3,12 @@ package ru.liga.loading.validators;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.liga.loading.exceptions.ParcelNotFound;
 import ru.liga.loading.exceptions.ParcelValidationException;
 import ru.liga.loading.models.Parcel;
 import ru.liga.loading.repositories.ParcelRepository;
 
-import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -23,15 +23,17 @@ public class ParcelValidator {
      * @throws ParcelValidationException если снимок посылки невалиден.
      */
     public void validateExisting(Parcel parcel) {
-        List<Parcel> existingParcels = parcelRepository.findAll();
-        if (!existingParcels.contains(parcel)) {
+        char symbol = parcel.getBox()[0][0];
+        Optional<Parcel> parcelOpt = parcelRepository.findBySymbol(symbol);
+
+        parcelOpt.orElseThrow(() -> {
             log.error("Parcels are not valid");
-            throw new ParcelNotFound("Parcel not found");
-        }
+            return new NoSuchElementException("Parcel not found");
+        });
     }
 
     /**
-     * Метод проверки соответствия формы
+     * Метод проверки валидности посылки.
      * @param parcel посылка.
      * @throws ParcelValidationException если не все символы в форме посылки соответствуют её символу.
      */
@@ -45,5 +47,15 @@ public class ParcelValidator {
                     throw new ParcelValidationException("All box symbols must be parcel symbol");
             }
         }
+    }
+
+    /**
+     * Метод для валидации посылки на существование и соответствие формы.
+     * @param parcel посылка.
+     */
+    public void validate(Parcel parcel) {
+        System.out.println("validating " + parcel);
+        validateExisting(parcel);
+        validateBox(parcel);
     }
 }

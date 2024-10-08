@@ -1,0 +1,43 @@
+services:
+  loading_service:
+    container_name: loading_service_container
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+#      SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/{DB_NAME}"
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    restart: always
+    networks:
+      - loading_service_network
+
+  db:
+    container_name: db_container
+    image: postgres:15.1-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: "${DB_USERNAME}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_DB: "${DB_NAME}"
+#      PGUSER: "${PGUSER}"
+    networks:
+      - loading_service_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-U", "${DB_USER}", "-d", "${DB_NAME}" ]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 80s
+
+networks:
+  task_management_network:
+    name: loading_service_network
+volumes:
+  postgres_data:

@@ -36,7 +36,7 @@ public interface LoadingService {
                 .sum();
 
         int parcelsBoxesTotalSquare = parcels.stream()
-                .map(Parcel::getSquare)
+                .map(Parcel::calculateSquare)
                 .mapToInt(x -> x)
                 .sum();
 

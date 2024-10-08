@@ -28,7 +28,7 @@ public class ParcelReader {
     public List<Parcel> readParcelsFromFile(String filePath) {
         log.debug("Method '{}' has started", "readParcelsFromFile");
 
-        List<Parcel> parcels = null;
+        List<Parcel> parcels;
         try {
             String text = Files.readString(Path.of(filePath));
 
@@ -51,12 +51,34 @@ public class ParcelReader {
      * @param symbol символ посылки.
      * @return посылку с заполненной формой.
      */
-    public Parcel readParcel(String name, char symbol) {
-        char[][] box = readParcelBox();
+    public Parcel readParcelFromConsole(String name, char symbol) {
+        char[][] box = readParcelBoxFromConsole();
         return new Parcel(name, symbol, box);
     }
 
-    private char[][] readParcelBox() {
+    public Parcel readParcelFromFile(String name, char symbol, String filePath) {
+        char[][] box = readParcelBoxFromFile(filePath);
+        return new Parcel(name, symbol, box);
+    }
+
+    private char[][] readParcelBoxFromFile(String filePath) {
+        String text;
+        try {
+            text = Files.readString(Path.of(filePath));
+        } catch (IOException e) {
+            log.error("Problem with reading parcel box from file");
+            return new char[][]{};
+        }
+        String[] layers = text.split("\\n");
+        char[][] box = new char[layers.length][];
+
+        for (int i = 0; i < layers.length; i++) {
+            box[i] = layers[i].toCharArray();
+        }
+        return box;
+    }
+
+    private char[][] readParcelBoxFromConsole() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter parcel height:");
         int height = scanner.nextInt();

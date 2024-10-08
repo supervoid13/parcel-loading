@@ -16,9 +16,8 @@ import ru.liga.loading.services.TruckService;
 import ru.liga.loading.services.UniformLoadingService;
 import ru.liga.loading.utils.LoadingUtils;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -32,7 +31,16 @@ public class LoadingShellController {
     private final ParcelService parcelService;
 
 
-    /** Эндпоинт для погрузки посылок в грузовики */
+    /**
+     * Эндпоинт для погрузки посылок в грузовики.
+     * @param mode способ погрузки.
+     * @param trucks количество грузовиков (обязательно для метода UNIFORM, в остальных случаях игнорируется).
+     * @param height высота кузова грузовиков (по умолчанию 6).
+     * @param width ширина кузова грузовиков (по умолчанию 6).
+     * @param file путь к файлу.
+     * @param parcels список имён посылок.
+     * @return удобно-читаемую строку для списка погруженных грузовиков.
+     */
     @ShellMethod(key = "load")
     public String loadParcels(
             String mode,
@@ -48,7 +56,7 @@ public class LoadingShellController {
             throw new UnsupportedOperationException("You must enter no more and no less than " +
                     "1 parcels source (file/names)");
 
-        List<Parcel> parcelList = file.isBlank() ? parcelService.getParcelsByNames(parcels)
+        List<Parcel> parcelList = file.isBlank() ? parcelService.getParcelsByNames(Arrays.asList(parcels))
                 : parcelService.readParcelsFromFile(file);
 
         LoadingMode loadingMode = LoadingMode.valueOf(mode.toUpperCase());
@@ -60,19 +68,22 @@ public class LoadingShellController {
         return truckService.getPrettyOutputForTrucks(loadedTrucks);
     }
 
-    /** Эндпоинт для подсчёта посылок в грузовиках из json файла */
+    /**
+     * Эндпоинт для подсчёта посылок в грузовиках из json файла.
+     * @param file путь к файлу.
+     * @return удобно-читаемую строку для списка грузовиков.
+     */
     @ShellMethod(key = "specify")
     public String specifyParcels(String file) {
             return truckService.getPrettyOutputForTrucks(truckJsonReader.readTrucksFromJson(file));
     }
 
     /**
-     * Метод для отображения посылок (определённую посылку, если имя указано, все посылки - в противном случае).
+     * Эндпоинт для отображения посылок (определённую посылку, если имя указано, все посылки - в противном случае).
      * @param name имя посылки (необязательно).
-     * @throws FileNotFoundException если файл с посылками не найден.
      */
     @ShellMethod(key = "parcels")
-    public String displayParcels(@ShellOption(defaultValue = "") String name) throws FileNotFoundException {
+    public String displayParcels(@ShellOption(defaultValue = "") String name) {
         return name.isBlank() ? parcelService.getPrettyOutputForAllParcels()
                 : parcelService.getPrettyOutputForParcelByName(name);
     }
@@ -81,25 +92,34 @@ public class LoadingShellController {
      * Эндпоинт для создания новой посылки.
      * @param name имя посылки.
      * @param symbol символ формы.
-     * @throws IOException если произошла ошибка чтения формы посылки.
      */
     @ShellMethod(key = "create")
-    public void createParcel(String name, char symbol) throws IOException {
-        parcelService.save(name, symbol);
+    public void createParcel(String name, char symbol) {
+        parcelService.createParcel(name, symbol);
     }
 
+    /**
+     * Эндпоинт для изменения существующей посылки.
+     * @param name имя посылки.
+     * @param newName новое имя посылки.
+     * @param newSymbol новый символ посылки.
+     */
     @ShellMethod(key = "update")
     public void updateParcel(
             String name,
             @ShellOption(defaultValue = "") String newName,
             @ShellOption(defaultValue = " ") char newSymbol
-    ) throws IOException {
-        parcelService.update(name, newName, newSymbol);
+    ) {
+        parcelService.updateParcel(name, newName, newSymbol);
     }
 
+    /**
+     * Эндпоинт для удаления существующей посылки.
+     * @param name имя посылки.
+     */
     @ShellMethod(key = "delete")
-    public void deleteParcel(String name) throws IOException {
-        parcelService.delete(name);
+    public void deleteParcel(String name) {
+        parcelService.deleteParcel(name);
     }
 
     private List<Truck> loadTrucks(

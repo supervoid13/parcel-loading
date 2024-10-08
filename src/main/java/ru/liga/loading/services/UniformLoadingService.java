@@ -91,7 +91,7 @@ public class UniformLoadingService implements LoadingService {
         double diff = Integer.MAX_VALUE;
 
         for (Parcel parcel : parcels) {
-            int occupiedSpaceIfLoad = occupiedSpace + parcel.getSquare();
+            int occupiedSpaceIfLoad = occupiedSpace + parcel.calculateSquare();
             double currentDiff = Math.abs(avgSquare - occupiedSpaceIfLoad);
 
             if (!(currentDiff < diff)) {
@@ -109,7 +109,7 @@ public class UniformLoadingService implements LoadingService {
         int occupiedSpace = truck.calculateOccupiedSpaceSquare();
         double diffBeforeLoad = Math.abs(avgParcelsSquare - occupiedSpace);
 
-        int occupiedSpaceIfLoad = occupiedSpace + parcel.getSquare();
+        int occupiedSpaceIfLoad = occupiedSpace + parcel.calculateSquare();
         double diffIfLoad = Math.abs(avgParcelsSquare - occupiedSpaceIfLoad);
 
         return diffIfLoad < diffBeforeLoad;
@@ -117,7 +117,7 @@ public class UniformLoadingService implements LoadingService {
 
     private double calculateAverageSquare(List<Parcel> parcels, int truckAmount) {
         double totalParcelsSquare = parcels.stream()
-                .map(Parcel::getSquare)
+                .map(Parcel::calculateSquare)
                 .mapToInt(x -> x)
                 .sum();
 

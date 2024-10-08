@@ -37,7 +37,6 @@ public class EffectiveLoadingService implements LoadingService {
     private List<Truck> loadTrucksWithParcels(List<Parcel> parcels, int truckWidth, int truckHeight) {
         log.debug("Method '{}' has started", "loadTrucksWithParcels");
 
-
         parcelLoader.checkParcelsFitTruckBodies(parcels, truckHeight, truckWidth);
 
         log.info("Preparing parcels by bottom width and square");

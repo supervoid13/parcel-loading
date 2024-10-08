@@ -41,8 +41,8 @@ public class ParcelLoader {
      * @return {@code true} если возможно погрузить посылку, {@code false} в противном случае
      */
     public boolean possibleToLoad(Parcel parcel, Truck truck, int layerLevel, int spaceWidth, int index) {
-        int parcelWidth = parcel.getBottomWidth();
-        int parcelHeight = parcel.getHeight();
+        int parcelWidth = parcel.calculateBottomWidth();
+        int parcelHeight = parcel.calculateHeight();
 
         int freeHeight = truck.getHeight() - layerLevel + 1;
 
@@ -60,13 +60,13 @@ public class ParcelLoader {
      */
     public void checkParcelsFitTruckBodies(List<Parcel> parcels, int truckHeight, int truckWidth) {
         int maxParcelHeight = parcels.stream()
-                .map(Parcel::getHeight)
+                .map(Parcel::calculateHeight)
                 .mapToInt(x -> x)
                 .max()
                 .orElse(0);
 
         int maxParcelWidth = parcels.stream()
-                .map(Parcel::getMaxWidth)
+                .map(Parcel::calculateMaxWidth)
                 .mapToInt(x -> x)
                 .max()
                 .orElse(0);

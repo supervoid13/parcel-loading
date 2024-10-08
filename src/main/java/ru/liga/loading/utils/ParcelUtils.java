@@ -26,8 +26,8 @@ public class ParcelUtils {
     public List<Parcel> prepareParcelsByBottomWidthThenSquare(List<Parcel> parcels) {
         ArrayList<Parcel> parcelsCopy = new ArrayList<>(parcels);
 
-        parcelsCopy.sort(Comparator.comparing(Parcel::getBottomWidth)
-                .thenComparing(Parcel::getSquare)
+        parcelsCopy.sort(Comparator.comparing(Parcel::calculateBottomWidth)
+                .thenComparing(Parcel::calculateSquare)
                 .reversed());
 
         return parcelsCopy;
@@ -41,7 +41,7 @@ public class ParcelUtils {
     public List<Parcel> prepareParcelsBySquare(List<Parcel> parcels) {
         ArrayList<Parcel> parcelsCopy = new ArrayList<>(parcels);
 
-        parcelsCopy.sort(Comparator.comparing(Parcel::getSquare)
+        parcelsCopy.sort(Comparator.comparing(Parcel::calculateSquare)
                 .reversed());
 
         return parcelsCopy;

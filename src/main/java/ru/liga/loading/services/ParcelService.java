@@ -9,10 +9,11 @@ import ru.liga.loading.repositories.ParcelRepository;
 import ru.liga.loading.validators.ParcelValidator;
 import ru.liga.loading.view.ParcelView;
 
-import java.io.IOException;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -22,6 +23,7 @@ public class ParcelService {
     private final ParcelRepository parcelRepository;
     private final ParcelView parcelView;
     private final ParcelValidator parcelValidator;
+
 
     /**
      * Чтение посылок из файла.
@@ -37,10 +39,10 @@ public class ParcelService {
      * @param names имена посылок.
      * @return список посылок.
      */
-    public List<Parcel> getParcelsByNames(String[] names) {
+    public List<Parcel> getParcelsByNames(List<String> names) {
         List<Parcel> parcels = new ArrayList<>();
         for (String name : names) {
-            parcels.add(getByName(name));
+            parcels.add(getParcelByName(name));
         }
         return parcels;
     }
@@ -59,28 +61,44 @@ public class ParcelService {
      * @return строку, отображающую посылку.
      */
     public String getPrettyOutputForParcelByName(String name) {
-        return getByName(name).convertToPrettyOutput();
+        return getParcelByName(name).convertToPrettyOutput();
     }
 
     /**
-     * Метод сохранения новой посылки.
+     * Метод создания новой посылки.
      * @param name имя посылки.
      * @param symbol символ формы.
      * @throws ParcelAlreadyExistException если посылка с таким именем уже существует.
      */
-    public void save(String name, char symbol) {
-        Parcel parcel = parcelReader.readParcel(name, symbol);
+    @Transactional
+    public void createParcel(String name, char symbol) {
+        Parcel parcel = parcelReader.readParcelFromConsole(name, symbol);
+        saveParcel(parcel);
+    }
+
+    /**
+     * Метод создания новой посылки, имея все данные.
+     * @param parcel посылка.
+     */
+    @Transactional
+    public void saveParcel(Parcel parcel) {
         parcelValidator.validateBox(parcel);
         parcelRepository.save(parcel);
+    }
+
+    @Transactional
+    public void saveAll(List<Parcel> parcels) {
+        parcelRepository.saveAll(parcels);
     }
 
     /**
      * Метод изменения посылки по её имени.
      * @param newName имя посылки.
-     * @throws NoSuchElementException если посылка с таким именем не найдена.
+     * @throws NoSuchElementException если посылки с таким именем не существует.
      */
-    public void update(String name, String newName, char newSymbol) {
-        Parcel parcel = parcelReader.readParcel(newName, newSymbol);
+    @Transactional
+    public void updateParcel(String name, String newName, char newSymbol) {
+        Parcel parcel = parcelReader.readParcelFromConsole(newName, newSymbol);
 
         if (!newName.isBlank())
             parcel.setName(newName);
@@ -88,19 +106,57 @@ public class ParcelService {
         if (newSymbol != ' ') {
             parcel.setSymbol(newSymbol);
         }
-        parcelValidator.validateBox(parcel);
-        parcelRepository.update(name, parcel);
+        updateParcelHavingBox(name, parcel);
     }
 
-    public void delete(String name) throws IOException {
-        parcelRepository.deleteByName(name);
+    /**
+     * Метод обновления данных посылки по имени.
+     * @param name имя посылки.
+     * @param parcel посылка, содержащая новые данные.
+     * @throws NoSuchElementException если посылки с таким именем не существует.
+     */
+    @Transactional
+    public void updateParcelHavingBox(String name, Parcel parcel) {
+        Optional<Parcel> parcelOpt = parcelRepository.findByName(name);
+        Parcel toUpdate = parcelOpt.orElseThrow(() -> new NoSuchElementException("No such parcel"));
+
+        toUpdate.setName(parcel.getName());
+        toUpdate.setSymbol(parcel.getSymbol());
+        toUpdate.setBox(parcel.getBox());
+
+        saveParcel(toUpdate);
     }
 
-    private List<Parcel> getAllParcels() {
+    /**
+     * Метод удаления посылки по имени.
+     * @param name имя посылки.
+     * @throws NoSuchElementException если посылки с таким именем не существует.
+     */
+    @Transactional
+    public void deleteParcel(String name) {
+        Parcel parcel = parcelRepository.findByName(name).orElseThrow(
+                () -> new NoSuchElementException("No such parcel")
+        );
+        parcelRepository.delete(parcel);
+    }
+
+    /**
+     * Метод получения всех посылок.
+     * @return список посылок.
+     */
+    public List<Parcel> getAllParcels() {
         return parcelRepository.findAll();
     }
 
-    private Parcel getByName(String name) {
-        return parcelRepository.findByName(name).orElseThrow(() -> new NoSuchElementException("No such parcel " + name));
+    /**
+     * Метод получения посылки по имени.
+     * @param name имя посылки.
+     * @return посылку с указанным именем.
+     * @throws NoSuchElementException если посылки с таким именем не существует.
+     */
+    public Parcel getParcelByName(String name) {
+        return parcelRepository.findByName(name).orElseThrow(
+                () -> new NoSuchElementException("No such parcel " + name)
+        );
     }
 }
