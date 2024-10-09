@@ -4,7 +4,7 @@ target/
 !**/src/test/**/target/
 
 ### IntelliJ IDEA ###
-temp
+telegram
 .env
 logs
 spring-shell.log

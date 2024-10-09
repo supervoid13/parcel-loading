@@ -14,9 +14,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import ru.liga.loading.enums.Command;
 import ru.liga.loading.services.TgCommandProcessorService;
-import ru.liga.loading.utils.TgCommandProcessor;
-
-import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,7 +26,10 @@ public class ParcelLoaderBot implements SpringLongPollingBot, LongPollingSingleT
     private final TelegramClient tgClient;
     private final TgCommandProcessorService tgCommandProcessorService;
 
-
+    /**
+     * Метод обработки события в телеграм боте.
+     * @param update событие.
+     */
     @Override
     public void consume(Update update) {
         Message message;

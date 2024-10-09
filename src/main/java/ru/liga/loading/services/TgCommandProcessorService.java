@@ -1,6 +1,5 @@
 package ru.liga.loading.services;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
@@ -28,6 +27,12 @@ public class TgCommandProcessorService {
         commandProcessorMap.put(Command.DELETE, tgService::processDeletingParcel);
     }
 
+    /**
+     * Метод обработки команды и сообщения в телеграмме.
+     * @param command команда.
+     * @param message сообщение.
+     * @return ответ-строку.
+     */
     public String processCommand(Command command, Message message) {
         return commandProcessorMap.get(command).process(message);
     }

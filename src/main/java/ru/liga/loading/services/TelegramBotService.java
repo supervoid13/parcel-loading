@@ -11,9 +11,11 @@ import ru.liga.loading.models.Truck;
 import ru.liga.loading.readers.ParcelReader;
 import ru.liga.loading.readers.TelegramFileDownloader;
 import ru.liga.loading.readers.TruckJsonReader;
-import ru.liga.loading.utils.LoadingUtils;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +41,7 @@ public class TelegramBotService {
     /**
      * Метод погрузки грузовиков.
      * @param message полученное сообщение.
-     * @return ответ-строку c погруженными грузовиками.
+     * @return ответ-строку с погруженными грузовиками.
      */
     public String processLoading(Message message) {
         String[] words = message.getText().split("\\s");
@@ -136,6 +138,7 @@ public class TelegramBotService {
         Document document = message.getDocument();
         try {
             Parcel parcel = createParcel(name, symbol, document);
+            System.out.println(parcel);
             parcelService.saveParcel(parcel);
         } catch (ParcelValidationException e) {
             return "All box symbols must be parcel symbol";
@@ -167,8 +170,8 @@ public class TelegramBotService {
         }
 
         String[] words = message.getCaption().split("\\s");
-        if (words.length < 3) {
-            return "You must specify name and symbol of new parcel";
+        if (words.length < 4) {
+            return "You must specify name, new name and symbol of updating parcel";
         }
         String name = words[PARCEL_NAME_INDEX], newName = words[PARCEL_NEW_NAME_INDEX];
         char symbol = words[PARCEL_SYMBOL_INDEX].charAt(0);

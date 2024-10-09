@@ -22,7 +22,7 @@ public class TelegramFileDownloader {
 
     private static final String HOST = "https://api.telegram.org";
     private static final String GET_FILE_INFO_PATTERN = "/getFile?file_id=";
-    private static final String STORAGE_DIRECTORY = "temp/";
+    private static final String STORAGE_DIRECTORY = "telegram/";
 
     /**
      * Метод загрузки файла с телеграмм сервера.
@@ -34,23 +34,21 @@ public class TelegramFileDownloader {
         String fileId = document.getFileId(), fileName = document.getFileName();
         URL url = new URL(HOST + "/bot" + TOKEN + GET_FILE_INFO_PATTERN + fileId);
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
-        String getFileResponse = reader.readLine();
+        String localFilePath;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
+            String getFileResponse = reader.readLine();
 
-        JSONObject jsObject = new JSONObject(getFileResponse);
-        JSONObject path = jsObject.getJSONObject("result");
-        String filePath = path.getString("file_path");
+            JSONObject jsObject = new JSONObject(getFileResponse);
+            JSONObject path = jsObject.getJSONObject("result");
+            String filePath = path.getString("file_path");
 
-        String localFilePath = STORAGE_DIRECTORY + fileName;
+            localFilePath = STORAGE_DIRECTORY + fileName;
 
-        File localFile = new File(localFilePath);
-        InputStream inputStream = new URL(HOST + "/file/bot" + TOKEN + "/" + filePath).openStream();
-
-        FileUtils.copyInputStreamToFile(inputStream, localFile);
-
-        reader.close();
-        inputStream.close();
-
+            File localFile = new File(localFilePath);
+            try (InputStream inputStream = new URL(HOST + "/file/bot" + TOKEN + "/" + filePath).openStream()) {
+                FileUtils.copyInputStreamToFile(inputStream, localFile);
+            }
+        }
         return localFilePath;
     }
 }

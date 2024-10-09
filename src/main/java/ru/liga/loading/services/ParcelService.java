@@ -86,11 +86,6 @@ public class ParcelService {
         parcelRepository.save(parcel);
     }
 
-    @Transactional
-    public void saveAll(List<Parcel> parcels) {
-        parcelRepository.saveAll(parcels);
-    }
-
     /**
      * Метод изменения посылки по её имени.
      * @param newName имя посылки.
