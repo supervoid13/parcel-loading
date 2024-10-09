@@ -44,7 +44,8 @@ public class TelegramBotService {
      * @return ответ-строку с погруженными грузовиками.
      */
     public String processLoading(Message message) {
-        String[] words = message.getText().split("\\s");
+        String text = message.hasDocument() ? message.getCaption() : message.getText();
+        String[] words = text.split("\\s");
         String mode = words[LOADING_MODE_INDEX];
         LoadingMode loadingMode = LoadingMode.valueOf(mode.toUpperCase());
 
