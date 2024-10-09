@@ -4,32 +4,80 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
+import ru.liga.loading.enums.LoadingMode;
 import ru.liga.loading.exceptions.ParcelValidationException;
 import ru.liga.loading.models.Parcel;
+import ru.liga.loading.models.Truck;
 import ru.liga.loading.readers.ParcelReader;
 import ru.liga.loading.readers.TelegramFileDownloader;
+import ru.liga.loading.readers.TruckJsonReader;
+import ru.liga.loading.utils.LoadingUtils;
 
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class TelegramBotService {
 
+    private final TruckService truckService;
+    private final TruckJsonReader truckJsonReader;
     private final ParcelService parcelService;
     private final ParcelReader parcelReader;
+    private final LoadingServiceFactory loadingServiceFactory;
     private final TelegramFileDownloader telegramFileDownloader;
 
     private static final int PARCEL_NAME_INDEX = 1;
     private static final int PARCEL_SYMBOL_INDEX = 2;
     private static final int PARCEL_NEW_NAME_INDEX = 3;
 
+    private static final int LOADING_MODE_INDEX = 1;
+    private static final int AMOUNT_OF_TRUCKS_INDEX = 2;
+    private static final int TRUCK_HEIGHT_INDEX = 3;
+    private static final int TRUCK_WIDTH_INDEX = 4;
+    private static final int PARCEL_LIST_FROM_INDEX = 5;
+
     /**
      * Метод погрузки грузовиков.
      * @param message полученное сообщение.
-     * @return ответ-строку.
+     * @return ответ-строку c погруженными грузовиками.
      */
     public String processLoading(Message message) {
-        return "LOADING...";
+        String[] words = message.getText().split("\\s");
+        String mode = words[LOADING_MODE_INDEX];
+        LoadingMode loadingMode = LoadingMode.valueOf(mode.toUpperCase());
+
+        List<Parcel> parcels = getParcelsFromMessage(message);
+
+        LoadingService loadingService = loadingServiceFactory.createLoadingServiceFromMode(loadingMode);
+
+        int trucksAmount = Integer.parseInt(words[AMOUNT_OF_TRUCKS_INDEX]);
+        int truckHeight = Integer.parseInt(words[TRUCK_HEIGHT_INDEX]), truckWidth = Integer.parseInt(words[TRUCK_WIDTH_INDEX]);
+
+        List<Truck> loadedTrucks = loadingService.loadTrucks(parcels, trucksAmount, truckWidth, truckHeight);
+
+        return truckService.getPrettyOutputForTrucks(loadedTrucks);
+    }
+
+    private List<Parcel> getParcelsFromMessage(Message message) {
+        List<Parcel> parcels;
+        if (message.hasDocument()) {
+            String filePath;
+            try {
+                filePath = telegramFileDownloader.download(message.getDocument());
+            } catch (Exception e) {
+                return Collections.emptyList();
+            }
+            parcels = parcelReader.readParcelsFromFile(filePath);
+        } else {
+            String[] words = message.getText().split("\\s");
+            List<String> parcelNames = getParcelNamesFromWords(words);
+            parcels = parcelService.getParcelsByNames(parcelNames);
+        }
+        return parcels;
+    }
+
+    private List<String> getParcelNamesFromWords(String[] words) {
+        return Arrays.asList(Arrays.copyOfRange(words, PARCEL_LIST_FROM_INDEX, words.length));
     }
 
     /**
@@ -38,7 +86,15 @@ public class TelegramBotService {
      * @return ответ-строку.
      */
     public String processSpecifying(Message message) {
-        return "SPECIFYING...";
+        if (message.hasDocument()) {
+            try {
+                String filePath = telegramFileDownloader.download(message.getDocument());
+                return truckService.getPrettyOutputForTrucks(truckJsonReader.readTrucksFromJson(filePath));
+            } catch (Exception e) {
+                return "Problem with reading your file";
+            }
+        }
+        return "You must download file with loaded trucks";
     }
 
     /**
@@ -48,7 +104,7 @@ public class TelegramBotService {
      * @return ответ-строку (посылки в удобно-читаемой форме).
      */
     public String processRetrievingParcels(Message message) {
-        String[] words = message.getText().split(" ");
+        String[] words = message.getText().split("\\s");
         try {
             if (words.length == 1) {
                 return parcelService.getPrettyOutputForAllParcels();
@@ -70,7 +126,7 @@ public class TelegramBotService {
             return "You must download file with parcel box";
         }
 
-        String[] words = message.getCaption().split(" ");
+        String[] words = message.getCaption().split("\\s");
         if (words.length < 3) {
             return "You must specify name and symbol of new parcel";
         }
@@ -90,10 +146,9 @@ public class TelegramBotService {
     }
 
     private Parcel createParcel(String name, char symbol, Document document) {
-        String fileId = document.getFileId(), fileName = document.getFileName();
         Parcel parcel;
         try {
-            String filePath = telegramFileDownloader.download(fileId, fileName);
+            String filePath = telegramFileDownloader.download(document);
             parcel = parcelReader.readParcelFromFile(name, symbol, filePath);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -111,7 +166,7 @@ public class TelegramBotService {
             return "You must download file with parcel box";
         }
 
-        String[] words = message.getCaption().split(" ");
+        String[] words = message.getCaption().split("\\s");
         if (words.length < 3) {
             return "You must specify name and symbol of new parcel";
         }

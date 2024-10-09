@@ -62,7 +62,7 @@ public class LoadingShellController {
         LoadingMode loadingMode = LoadingMode.valueOf(mode.toUpperCase());
         LoadingService loadingService = loadingServiceFactory.createLoadingServiceFromMode(loadingMode);
 
-        List<Truck> loadedTrucks = loadTrucks(loadingService, parcelList, trucks, width, height);
+        List<Truck> loadedTrucks = loadingService.loadTrucks(parcelList, trucks, width, height);
 
         log.debug("Method '{}' has finished", "loadParcels");
         return truckService.getPrettyOutputForTrucks(loadedTrucks);
@@ -120,24 +120,5 @@ public class LoadingShellController {
     @ShellMethod(key = "delete")
     public void deleteParcel(String name) {
         parcelService.deleteParcel(name);
-    }
-
-    private List<Truck> loadTrucks(
-            LoadingService loadingService,
-            List<Parcel> parcels,
-            int trucks,
-            int width,
-            int height
-    ) {
-        log.info("Loading process has started");
-        List<Truck> loadedTrucks;
-        if (loadingService instanceof UniformLoadingService ) {
-            List<Truck> emptyTrucks = LoadingUtils.generateEmptyTrucks(trucks, width, height);
-            loadedTrucks = loadingService.loadTrucksWithParcelsWithGivenTrucks(parcels, new ArrayList<>(emptyTrucks));
-        } else {
-            loadedTrucks = loadingService.loadTrucksWithParcelsWithInfiniteTrucksAmount(parcels, width, height);
-        }
-        log.info("Loading has finished");
-        return loadedTrucks;
     }
 }

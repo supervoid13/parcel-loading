@@ -2,7 +2,9 @@ package ru.liga.loading.services;
 
 import ru.liga.loading.models.Parcel;
 import ru.liga.loading.models.Truck;
+import ru.liga.loading.utils.LoadingUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public interface LoadingService {
@@ -41,5 +43,21 @@ public interface LoadingService {
                 .sum();
 
         return parcelsBoxesTotalSquare <= trucksBodyTotalSquare;
+    }
+
+    default List<Truck> loadTrucks(
+            List<Parcel> parcels,
+            int trucks,
+            int width,
+            int height
+    ) {
+        List<Truck> loadedTrucks;
+        if (this instanceof UniformLoadingService) {
+            List<Truck> emptyTrucks = LoadingUtils.generateEmptyTrucks(trucks, width, height);
+            loadedTrucks = loadTrucksWithParcelsWithGivenTrucks(parcels, new ArrayList<>(emptyTrucks));
+        } else {
+            loadedTrucks = loadTrucksWithParcelsWithInfiniteTrucksAmount(parcels, width, height);
+        }
+        return loadedTrucks;
     }
 }

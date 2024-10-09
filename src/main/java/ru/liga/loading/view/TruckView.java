@@ -31,7 +31,6 @@ public class TruckView {
             sb.append("Truck's body\n");
             sb.append(truck.convertToPrettyBody()).append("\n");
         }
-
         return sb.toString();
     }
 }

@@ -79,7 +79,7 @@ public class LoadingRestController {
 
         LoadingService loadingService = loadingServiceFactory.createLoadingServiceFromMode(loadingModeDef);
 
-        List<Truck> loadedTrucks = loadTrucks(loadingService, parcels, trucks, width, height);
+        List<Truck> loadedTrucks = loadingService.loadTrucks(parcels, trucks, width, height);
 
         log.debug("Method '{}' has finished", "loadParcels");
         return ResponseEntity.ok(loadedTrucks);
@@ -147,24 +147,5 @@ public class LoadingRestController {
         parcelService.deleteParcel(name);
 
         return ResponseEntity.ok(new ResponseInfoDto(HttpStatus.OK.value(), "Parcel successfully deleted"));
-    }
-
-    private List<Truck> loadTrucks(
-            LoadingService loadingService,
-            List<Parcel> parcels,
-            int trucks,
-            int width,
-            int height
-    ) {
-        log.info("Loading process has started");
-        List<Truck> loadedTrucks;
-        if (loadingService instanceof UniformLoadingService) {
-            List<Truck> emptyTrucks = LoadingUtils.generateEmptyTrucks(trucks, width, height);
-            loadedTrucks = loadingService.loadTrucksWithParcelsWithGivenTrucks(parcels, new ArrayList<>(emptyTrucks));
-        } else {
-            loadedTrucks = loadingService.loadTrucksWithParcelsWithInfiniteTrucksAmount(parcels, width, height);
-        }
-        log.info("Loading has finished");
-        return loadedTrucks;
     }
 }

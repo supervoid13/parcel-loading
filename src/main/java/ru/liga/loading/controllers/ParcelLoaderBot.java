@@ -44,11 +44,10 @@ public class ParcelLoaderBot implements SpringLongPollingBot, LongPollingSingleT
 
         if (hasText || hasCaption) {
             String messageText = hasText ? message.getText() : message.getCaption();
-            String commandStr = messageText.split(" ")[0];
+            String commandStr = messageText.split("\\s")[0];
             try {
                 Command command = Command.valueOf(commandStr.toUpperCase());
-                Map<Command, TgCommandProcessor> commandProcessorMap = tgCommandProcessorService.getCommandProcessorMap();
-                answer = commandProcessorMap.get(command).process(message);
+                answer = tgCommandProcessorService.processCommand(command, message);
             } catch (IllegalArgumentException e) {
                 answer = "No such command";
             }
