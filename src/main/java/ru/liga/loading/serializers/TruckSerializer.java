@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.liga.loading.exceptions.TruckValidationException;
 import ru.liga.loading.models.Truck;
-import ru.liga.loading.validators.TruckJsonValidator;
+import ru.liga.loading.validators.TruckValidator;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TruckSerializer {
 
-    private final TruckJsonValidator validator;
+    private final TruckValidator validator;
     private final Gson gson;
 
     /**

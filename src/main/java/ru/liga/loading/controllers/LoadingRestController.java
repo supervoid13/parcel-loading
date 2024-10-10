@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.liga.loading.dto.LoadingDataDto;
 import ru.liga.loading.dto.ParcelDto;
+import ru.liga.loading.dto.TruckDto;
 import ru.liga.loading.enums.LoadingMode;
 import ru.liga.loading.models.Parcel;
 import ru.liga.loading.models.Truck;
@@ -24,6 +25,7 @@ import ru.liga.loading.services.LoadingServiceFactory;
 import ru.liga.loading.services.ParcelService;
 import ru.liga.loading.services.TruckService;
 import ru.liga.loading.validators.ParcelValidator;
+import ru.liga.loading.validators.TruckValidator;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -35,8 +37,9 @@ import java.util.List;
 @Validated
 public class LoadingRestController {
 
-    private final TruckJsonReader truckJsonReader;
     private final LoadingServiceFactory loadingServiceFactory;
+    private final TruckJsonReader truckJsonReader;
+    private final TruckValidator truckValidator;
     private final TruckService truckService;
     private final ParcelService parcelService;
     private final ParcelValidator parcelValidator;
@@ -69,12 +72,13 @@ public class LoadingRestController {
 
     /**
      * Эндпоинт для подсчёта посылок в грузовиках из json файла.
-     * @param trucksJsonString тело запроса в виде строки.
+     * @param truckDtos список грузовиков.
      * @return удобно-читаемую строку с подсчётом посылок и кузовами грузовиков.
      */
     @PostMapping("/specify")
-    public String specifyParcels(@RequestBody String trucksJsonString) {
-        List<Truck> trucks = truckJsonReader.readTrucksFromJsonString(trucksJsonString);
+    public String specifyParcels(@RequestBody List<TruckDto> truckDtos) {
+        List<Truck> trucks = modelMapper.map(truckDtos, new TypeToken<List<Truck>>() {}.getType());
+        truckValidator.validateTruckList(trucks);
 
         return truckService.getPrettyOutputForTrucks(trucks);
     }

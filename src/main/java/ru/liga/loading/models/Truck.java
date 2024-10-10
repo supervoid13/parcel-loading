@@ -1,13 +1,15 @@
 package ru.liga.loading.models;
 
-import lombok.Value;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.liga.loading.exceptions.NotEnoughSpaceException;
 import ru.liga.loading.utils.LoadingUtils;
 
 import java.util.Arrays;
 import java.util.Objects;
 
-@Value
+@Data
+@NoArgsConstructor
 public class Truck {
 
     public static final char EMPTY_SPACE_DESIGNATION = ' ';

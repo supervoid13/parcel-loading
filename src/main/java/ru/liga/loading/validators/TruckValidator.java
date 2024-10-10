@@ -16,7 +16,7 @@ import java.util.Set;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class TruckJsonValidator {
+public class TruckValidator {
 
     private final ParcelRepository parcelRepository;
 

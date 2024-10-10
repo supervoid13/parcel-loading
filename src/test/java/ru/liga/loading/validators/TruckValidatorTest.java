@@ -12,13 +12,13 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(properties = "spring.shell.interactive.enabled=false")
-public class TruckJsonValidatorTest {
+public class TruckValidatorTest {
 
-    private final TruckJsonValidator truckJsonValidator;
+    private final TruckValidator truckValidator;
 
     @Autowired
-    public TruckJsonValidatorTest(TruckJsonValidator truckJsonValidator) {
-        this.truckJsonValidator = truckJsonValidator;
+    public TruckValidatorTest(TruckValidator truckValidator) {
+        this.truckValidator = truckValidator;
     }
 
     @Test
@@ -35,7 +35,7 @@ public class TruckJsonValidatorTest {
         };
         List<Truck> trucks = List.of(new Truck(body));
 
-        assertThatThrownBy(() -> truckJsonValidator.validateTruckList(trucks))
+        assertThatThrownBy(() -> truckValidator.validateTruckList(trucks))
                 .isInstanceOf(TruckValidationException.class);
     }
 
@@ -53,6 +53,6 @@ public class TruckJsonValidatorTest {
         };
         List<Truck> trucks = List.of(new Truck(body));
 
-        assertThatCode(() -> truckJsonValidator.validateTruckList(trucks)).doesNotThrowAnyException();
+        assertThatCode(() -> truckValidator.validateTruckList(trucks)).doesNotThrowAnyException();
     }
 }
