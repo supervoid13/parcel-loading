@@ -22,7 +22,7 @@ public class TelegramFileDownloader {
 
     private static final String HOST = "https://api.telegram.org";
     private static final String GET_FILE_INFO_PATTERN = "/getFile?file_id=";
-    private static final String STORAGE_DIRECTORY = "telegram/";
+    private static final String STORAGE_DIRECTORY = "tgtemp/";
 
     /**
      * Метод загрузки файла с телеграмм сервера.

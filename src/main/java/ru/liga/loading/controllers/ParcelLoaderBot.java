@@ -13,7 +13,8 @@ import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import ru.liga.loading.enums.Command;
-import ru.liga.loading.services.TgCommandProcessorService;
+import ru.liga.loading.services.telegram.CommandProcessor;
+import ru.liga.loading.services.telegram.CommandProcessorFactory;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class ParcelLoaderBot implements SpringLongPollingBot, LongPollingSingleT
     private String TOKEN;
 
     private final TelegramClient tgClient;
-    private final TgCommandProcessorService tgCommandProcessorService;
+    private final CommandProcessorFactory commandProcessorFactory;
 
     /**
      * Метод обработки события в телеграм боте.
@@ -45,7 +46,8 @@ public class ParcelLoaderBot implements SpringLongPollingBot, LongPollingSingleT
             String commandStr = messageText.split("\\s")[0];
             try {
                 Command command = Command.valueOf(commandStr.toUpperCase());
-                answer = tgCommandProcessorService.processCommand(command, message);
+                CommandProcessor commandProcessor = commandProcessorFactory.createCommandProcessorFromCommand(command);
+                answer = commandProcessor.process(message);
             } catch (IllegalArgumentException e) {
                 answer = "No such command";
             }

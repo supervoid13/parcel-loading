@@ -2,11 +2,12 @@ package ru.liga.loading.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.objects.Document;
 import ru.liga.loading.exceptions.ParcelAlreadyExistException;
 import ru.liga.loading.models.Parcel;
 import ru.liga.loading.readers.ParcelReader;
+import ru.liga.loading.readers.TelegramFileDownloader;
 import ru.liga.loading.repositories.ParcelRepository;
-import ru.liga.loading.validators.ParcelValidator;
 import ru.liga.loading.view.ParcelView;
 
 import javax.transaction.Transactional;
@@ -23,8 +24,7 @@ public class ParcelService {
     private final ParcelReader parcelReader;
     private final ParcelRepository parcelRepository;
     private final ParcelView parcelView;
-    private final ParcelValidator parcelValidator;
-
+    private final TelegramFileDownloader telegramFileDownloader;
 
     /**
      * Чтение посылок из файла.
@@ -157,5 +157,23 @@ public class ParcelService {
         return parcelRepository.findByName(name).orElseThrow(
                 () -> new NoSuchElementException("No such parcel " + name)
         );
+    }
+
+    /**
+     * Метод создания объекта посылки.
+     * @param name имя посылки.
+     * @param symbol символ посылки.
+     * @param document документ с формой.
+     * @return созданную посылку.
+     */
+    public Parcel createParcel(String name, char symbol, Document document) {
+        Parcel parcel;
+        try {
+            String filePath = telegramFileDownloader.download(document);
+            parcel = parcelReader.readParcelFromFile(name, symbol, filePath);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return parcel;
     }
 }
