@@ -11,6 +11,7 @@ import ru.liga.loading.models.Truck;
 import ru.liga.loading.readers.ParcelReader;
 import ru.liga.loading.readers.TelegramFileDownloader;
 import ru.liga.loading.readers.TruckJsonReader;
+import ru.liga.loading.validators.ParcelValidator;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,6 +26,7 @@ public class TelegramBotService {
     private final TruckJsonReader truckJsonReader;
     private final ParcelService parcelService;
     private final ParcelReader parcelReader;
+    private final ParcelValidator parcelValidator;
     private final LoadingServiceFactory loadingServiceFactory;
     private final TelegramFileDownloader telegramFileDownloader;
 
@@ -139,7 +141,7 @@ public class TelegramBotService {
         Document document = message.getDocument();
         try {
             Parcel parcel = createParcel(name, symbol, document);
-            System.out.println(parcel);
+            parcelValidator.validateBox(parcel);
             parcelService.saveParcel(parcel);
         } catch (ParcelValidationException e) {
             return "All box symbols must be parcel symbol";
@@ -180,6 +182,7 @@ public class TelegramBotService {
         Document document = message.getDocument();
         try {
             Parcel parcel = createParcel(newName, symbol, document);
+            parcelValidator.validateBox(parcel);
             parcelService.updateParcelHavingBox(name, parcel);
         } catch (ParcelValidationException e) {
             return "All box symbols must be parcel symbol";

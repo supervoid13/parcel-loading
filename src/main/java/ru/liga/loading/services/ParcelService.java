@@ -11,6 +11,7 @@ import ru.liga.loading.view.ParcelView;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -40,6 +41,9 @@ public class ParcelService {
      * @return список посылок.
      */
     public List<Parcel> getParcelsByNames(List<String> names) {
+        if (names == null) {
+            return Collections.emptyList();
+        }
         List<Parcel> parcels = new ArrayList<>();
         for (String name : names) {
             parcels.add(getParcelByName(name));
@@ -71,9 +75,9 @@ public class ParcelService {
      * @throws ParcelAlreadyExistException если посылка с таким именем уже существует.
      */
     @Transactional
-    public void createParcel(String name, char symbol) {
+    public Parcel createParcel(String name, char symbol) {
         Parcel parcel = parcelReader.readParcelFromConsole(name, symbol);
-        saveParcel(parcel);
+        return saveParcel(parcel);
     }
 
     /**
@@ -81,9 +85,9 @@ public class ParcelService {
      * @param parcel посылка.
      */
     @Transactional
-    public void saveParcel(Parcel parcel) {
-        parcelValidator.validateBox(parcel);
+    public Parcel saveParcel(Parcel parcel) {
         parcelRepository.save(parcel);
+        return parcel;
     }
 
     /**
@@ -92,7 +96,7 @@ public class ParcelService {
      * @throws NoSuchElementException если посылки с таким именем не существует.
      */
     @Transactional
-    public void updateParcel(String name, String newName, char newSymbol) {
+    public Parcel updateParcel(String name, String newName, char newSymbol) {
         Parcel parcel = parcelReader.readParcelFromConsole(newName, newSymbol);
 
         if (!newName.isBlank())
@@ -101,7 +105,7 @@ public class ParcelService {
         if (newSymbol != ' ') {
             parcel.setSymbol(newSymbol);
         }
-        updateParcelHavingBox(name, parcel);
+        return updateParcelHavingBox(name, parcel);
     }
 
     /**
@@ -111,7 +115,7 @@ public class ParcelService {
      * @throws NoSuchElementException если посылки с таким именем не существует.
      */
     @Transactional
-    public void updateParcelHavingBox(String name, Parcel parcel) {
+    public Parcel updateParcelHavingBox(String name, Parcel parcel) {
         Optional<Parcel> parcelOpt = parcelRepository.findByName(name);
         Parcel toUpdate = parcelOpt.orElseThrow(() -> new NoSuchElementException("No such parcel"));
 
@@ -119,7 +123,7 @@ public class ParcelService {
         toUpdate.setSymbol(parcel.getSymbol());
         toUpdate.setBox(parcel.getBox());
 
-        saveParcel(toUpdate);
+        return saveParcel(toUpdate);
     }
 
     /**

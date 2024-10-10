@@ -1,7 +1,8 @@
 package ru.liga.loading.models;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.liga.loading.utils.LoadingUtils;
 
 import javax.persistence.Column;
@@ -15,8 +16,9 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "parcels", schema = "loading")
-@Data
 @NoArgsConstructor
+@Getter
+@Setter
 public class Parcel {
 
     @Id

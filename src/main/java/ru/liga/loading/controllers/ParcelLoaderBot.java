@@ -32,12 +32,10 @@ public class ParcelLoaderBot implements SpringLongPollingBot, LongPollingSingleT
      */
     @Override
     public void consume(Update update) {
-        Message message;
-        if (update.hasMessage()) {
-            message = update.getMessage();
-        } else {
+        if (!update.hasMessage()) {
             return;
         }
+        Message message = update.getMessage();
 
         boolean hasText = message.hasText(), hasCaption = message.hasCaption();
         String answer;
@@ -68,8 +66,7 @@ public class ParcelLoaderBot implements SpringLongPollingBot, LongPollingSingleT
     }
 
     private SendMessage prepareMessage(long chatId, String answer) {
-        return SendMessage
-                .builder()
+        return SendMessage.builder()
                 .chatId(chatId)
                 .text(answer)
                 .build();

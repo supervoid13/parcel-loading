@@ -12,6 +12,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      DATA_SOURCE_URL: ${DATA_SOURCE_URL}
     restart: always
     networks:
       - loading_service_network

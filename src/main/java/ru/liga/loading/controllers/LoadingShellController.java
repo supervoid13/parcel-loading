@@ -94,8 +94,8 @@ public class LoadingShellController {
      * @param symbol символ формы.
      */
     @ShellMethod(key = "create")
-    public void createParcel(String name, char symbol) {
-        parcelService.createParcel(name, symbol);
+    public Parcel createParcel(String name, char symbol) {
+        return parcelService.createParcel(name, symbol);
     }
 
     /**
@@ -105,12 +105,12 @@ public class LoadingShellController {
      * @param newSymbol новый символ посылки.
      */
     @ShellMethod(key = "update")
-    public void updateParcel(
+    public Parcel updateParcel(
             String name,
             @ShellOption(defaultValue = "") String newName,
             @ShellOption(defaultValue = " ") char newSymbol
     ) {
-        parcelService.updateParcel(name, newName, newSymbol);
+        return parcelService.updateParcel(name, newName, newSymbol);
     }
 
     /**
