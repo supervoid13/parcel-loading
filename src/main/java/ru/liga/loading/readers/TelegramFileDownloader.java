@@ -2,8 +2,8 @@ package ru.liga.loading.readers;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Document;
 

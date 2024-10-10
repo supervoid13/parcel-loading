@@ -16,12 +16,11 @@
 $ git clone https://github.com/supervoid13/parcel-loading.git
 ```
 3. Откройте проект в любой удобной для Вас среде разработки, например, IntelliJ IDEA.
-4. Установите переменные среды, создав `.env` файл (или для простоты поменяйте в коде application.yaml и docker-compose.yaml).
-4. Из корня поднимите базу данных:
+4. Установите переменные среды, создав `.env` файл (в репозитории есть шаблон `.env.example`).
+4. Из корня запустите приложение.  
 ```sh
 $ docker compose up -d
 ```
-5. Запустите метод `main` в `ru.liga.loading.ParcelLoadingApplication.java`.
 
 ## Использование
 - ### Spring Shell
